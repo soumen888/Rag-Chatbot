@@ -1,0 +1,126 @@
+import chromadb
+from chromadb.utils import embedding_functions
+import os
+import re
+
+class VectorDB:
+    def __init__(self, db_path="./chroma_db"):
+        self.db_path = db_path
+        self.client = chromadb.PersistentClient(path=self.db_path)
+        
+        # Use sentence-transformers locally
+        print("[*] Loading local embedding model (all-MiniLM-L6-v2)...")
+        self.embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
+            model_name="all-MiniLM-L6-v2"
+        )
+
+    def sanitize_collection_name(self, name):
+        # ChromaDB collection names must be 3-63 chars, alphanumeric or _ or -
+        # and start/end with alphanumeric
+        sanitized = re.sub(r'[^a-zA-Z0-9_-]', '_', name)
+        sanitized = re.sub(r'_+', '_', sanitized)
+        # Trim to length constraints
+        if len(sanitized) > 60:
+            sanitized = sanitized[:60]
+        sanitized = sanitized.strip('_').strip('-')
+        # Ensure it has at least 3 chars
+        if len(sanitized) < 3:
+            sanitized = "doc_db_" + sanitized
+        return sanitized
+
+    def get_or_create_collection(self, collection_name):
+        safe_name = self.sanitize_collection_name(collection_name)
+        return self.client.get_or_create_collection(
+            name=safe_name,
+            embedding_function=self.embedding_function
+        )
+
+    def add_chunks(self, collection_name, chunks):
+        safe_name = self.sanitize_collection_name(collection_name)
+        collection = self.get_or_create_collection(collection_name)
+        
+        documents = []
+        metadatas = []
+        ids = []
+        
+        for idx, chunk in enumerate(chunks):
+            documents.append(chunk["text"])
+            
+            # ChromaDB metadata must be str, int, float, or bool
+            meta = {
+                "source": chunk["metadata"]["source"],
+                "title": chunk["metadata"]["title"],
+                "chunk_index": chunk["metadata"]["chunk_index"]
+            }
+            metadatas.append(meta)
+            
+            # Unique ID based on collection name, page title, and chunk index
+            unique_id = f"{safe_name}_{idx}"
+            ids.append(unique_id)
+            
+        # Insert in batches to prevent payload size limits
+        batch_size = 100
+        
+        print(f"[*] Storing {len(chunks)} chunks in ChromaDB collection: {safe_name}")
+        for i in range(0, len(ids), batch_size):
+            collection.add(
+                documents=documents[i:i+batch_size],
+                metadatas=metadatas[i:i+batch_size],
+                ids=ids[i:i+batch_size]
+            )
+        print("[+] Storage completed successfully.")
+
+    def query(self, collection_name, query_text, n_results=5):
+        collection = self.get_or_create_collection(collection_name)
+        results = collection.query(
+            query_texts=[query_text],
+            n_results=n_results
+        )
+        
+        formatted_results = []
+        if results and "documents" in results and results["documents"]:
+            docs = results["documents"][0]
+            metas = results["metadatas"][0]
+            distances = results["distances"][0] if "distances" in results else [0]*len(docs)
+            
+            for doc, meta, dist in zip(docs, metas, distances):
+                formatted_results.append({
+                    "text": doc,
+                    "metadata": meta,
+                    "distance": dist
+                })
+        return formatted_results
+
+    def list_collections(self):
+        return [c.name for c in self.client.list_collections()]
+
+    def delete_collection(self, collection_name):
+        safe_name = self.sanitize_collection_name(collection_name)
+        try:
+            self.client.delete_collection(name=safe_name)
+            print(f"[+] Collection '{safe_name}' deleted successfully.")
+            return True
+        except Exception as e:
+            print(f"[!] Error deleting collection '{safe_name}': {e}")
+            return False
+
+if __name__ == "__main__":
+    db = VectorDB(db_path="./test_chroma")
+    col_name = "test-doc"
+    chunks = [
+        {"text": "Python is a programming language.", "metadata": {"source": "http://python.org", "title": "Python Home", "chunk_index": 0}},
+        {"text": "RAG stands for Retrieval-Augmented Generation.", "metadata": {"source": "http://rag.org", "title": "RAG Info", "chunk_index": 0}}
+    ]
+    db.add_chunks(col_name, chunks)
+    
+    # Query test
+    res = db.query(col_name, "What is Python?")
+    print("Query Results:")
+    for r in res:
+        print(f"- Match (dist={r['distance']}): {r['text']} [Source: {r['metadata']['source']}]")
+        
+    # List collections
+    print("Collections:", db.list_collections())
+    
+    # Delete
+    db.delete_collection(col_name)

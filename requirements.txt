@@ -1,0 +1,21 @@
+# Core dependencies (always required)
+chromadb
+sentence-transformers
+beautifulsoup4
+requests
+python-dotenv
+playwright
+rich
+
+# ─────────────────────────────────────────────────
+# LLM Provider SDKs — install ONLY what you need
+# ─────────────────────────────────────────────────
+
+# Google AI Studio / Gemini / Gemma (default)
+google-genai
+
+# OpenAI, Groq, Together AI, Mistral, LM Studio, or any OpenAI-compatible API
+# pip install openai
+
+# Anthropic (Claude)
+# pip install anthropic

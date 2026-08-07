@@ -1,0 +1,23 @@
+# Python cache and temporary files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Local databases and caches
+chroma_db/
+.crawl_cache/
+test_chroma/
+
+# Environment configurations (contains API keys!)
+.env
+
+# OS-specific files
+.DS_Store
+Thumbs.db
