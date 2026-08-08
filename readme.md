@@ -7,19 +7,20 @@
 
 ---
 
-## ⚡ Direct Installation (macOS)
+## ⚡ Direct Installation
 
-The easiest way to install RAG Chat natively on macOS is via Homebrew:
-
+### macOS (via Homebrew)
+Install and run natively in one line:
 ```bash
-# Install directly from the repository tap in a single command
-brew install soumen888/Rag-Chatbot/ragchat
+brew install soumen888/Rag-Chatbot/ragchat && ragchat
 ```
 
-Once installed, simply run the following command in your terminal:
-```bash
-ragchat
+### Windows (via PowerShell)
+Open PowerShell (as Administrator) and run:
+```powershell
+irm https://raw.githubusercontent.com/soumen888/Rag-Chatbot/main/install.ps1 | iex
 ```
+*(Once installed, open a new terminal window and type `ragchat` to run).*
 
 ---
 
