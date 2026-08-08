@@ -15,6 +15,10 @@ chroma_db/
 .crawl_cache/
 test_chroma/
 
+# Telegram session files (contain full auth tokens — NEVER commit these!)
+*.session
+*.session-journal
+
 # Environment configurations (contains API keys!)
 .env
 

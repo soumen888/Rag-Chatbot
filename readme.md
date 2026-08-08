@@ -5,48 +5,40 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-> **Talk to any documentation website using AI.** DocChat recursively crawls documentation sites, indexes them into a local vector database, and answers questions using any cloud or local LLM — complete with exact source URL citations.
+> **Talk to any documentation website or Telegram channel using AI.** Crawls docs sites and indexes Telegram channels into a local vector database, then answers your questions using any cloud or local LLM — with exact source URL citations.
 
 ---
 
 ## ✨ Key Features
 
-- 🌐 **Universal Web Crawler**  
-  Point it at any documentation URL. Automatically crawls sub-pages while staying strictly on-domain and filtering out media assets (`.pdf`, `.png`, `.zip`, etc.).
+- 🌐 **Universal Web Crawler** — Point it at any documentation URL. Recursively crawls sub-pages, stays strictly on-domain, and filters out media assets.
 
-- ⚡ **Adaptive JavaScript & SPA Engine**  
-  Auto-detects if a site requires client-side JavaScript (React, Next.js, Vue SPAs) or static HTML. Uses Playwright headless Chromium only when necessary to ensure maximum crawling speed without missing content.
+- ⚡ **Adaptive JavaScript & SPA Engine** — Auto-detects if a site needs Playwright headless Chromium (React/Next.js/Vue) or fast `requests`. Uses Playwright only when needed.
 
-- 📜 **Infinite Scroll & Lazy-Load Handling**  
-  Automatically scrolls down pages and waits for network idle states to trigger lazy-loaded elements before extracting content.
+- 📜 **Infinite Scroll & Lazy-Load Handling** — Scrolls and waits for network idle before extracting content, so nothing is missed.
 
-- 💾 **Stateful Resume & Incremental Indexing**  
-  Pause and resume crawl sessions anytime. Automatically skips already-visited pages to save time and bandwidth.
+- 💾 **Stateful Resume & Incremental Indexing** — Pause and resume crawls anytime. Skips already-visited pages automatically.
 
-- 🔌 **Bring Your Own LLM (Cloud or Local)**  
-  Switch seamlessly between models via `.env` without modifying any code:
-  - **Cloud APIs**: Google AI Studio (Gemini/Gemma), OpenAI (GPT-4o), Groq, Together AI, Mistral AI, Anthropic (Claude).
-  - **Local Models**: Ollama (`llama3`, `mistral`, `phi3`), LM Studio, or any custom OpenAI-compatible endpoint.
+- 📱 **Telegram Channel Ingestion** — Connects via MTProto (Telethon). Accepts any channel username, invite link, or numeric Peer ID. Indexes historical messages into vector memory.
 
-- 🧠 **Privacy-First Local Vector Search**  
-  Text embeddings are generated 100% locally using `sentence-transformers/all-MiniLM-L6-v2` and stored in a persistent local ChromaDB instance. Your documentation content never leaves your machine.
+- 📊 **24-Hour Executive Digest** — Generates a structured AI summary of everything discussed in a Telegram channel over the past 24 hours, with clickable message links.
 
-- 📖 **Transparent Source Citations**  
-  Every generated answer ends with clickable, direct source URLs so you can verify answers against the official documentation.
+- 🔌 **Bring Your Own LLM (Cloud or Local)** — Switch between providers in `.env` without touching any code (see table below).
 
-- 🖥️ **Rich Interactive Terminal Interface**  
-  Features an interactive CLI menu with syntax-highlighted Markdown responses, formatted headers, and clean layout using `rich`.
+- 🧠 **Privacy-First Local Vector Search** — Embeddings are generated locally using `all-MiniLM-L6-v2` and stored in ChromaDB. Your content never leaves your machine.
+
+- 🖥️ **Clean Interactive Terminal UI** — Modular menu with sub-sections, rich Markdown responses, and `back` navigation from any prompt.
 
 ---
 
 ## ⚙️ Supported LLM Providers
 
-| Provider | `LLM_PROVIDER` | API Key Required? | Default / Example Model |
+| Provider | `LLM_PROVIDER` | API Key Required? | Default Model |
 |---|---|---|---|
-| **Google AI Studio** *(Default)* | `google` | Yes | `gemma-4-31b-it`, `gemini-2.0-flash` |
-| **Ollama** *(Local)* | `ollama` | ❌ No | `llama3`, `mistral`, `codellama` |
+| **Google AI Studio** *(Default)* | `google` | Yes | `gemma-4-31b-it` |
+| **Ollama** *(Local)* | `ollama` | ❌ No | `llama3` |
 | **LM Studio** *(Local)* | `lmstudio` | ❌ No | `local-model` |
-| **OpenAI** | `openai` | Yes | `gpt-4o-mini`, `gpt-4o` |
+| **OpenAI** | `openai` | Yes | `gpt-4o-mini` |
 | **Groq Cloud** | `groq` | Yes | `llama-3.3-70b-versatile` |
 | **Anthropic** | `anthropic` | Yes | `claude-3-5-sonnet-20241022` |
 | **Together AI** | `together` | Yes | `meta-llama/Llama-3-8b-chat-hf` |
@@ -57,19 +49,18 @@
 
 ## 🚀 Quick Start
 
-### Option A: Using Docker (Recommended — No Setup Required)
-
-If you have Docker installed, you can run DocChat in seconds without installing Python, Playwright, or system packages:
+### Option A: Docker (Recommended — No Python Setup Required)
 
 ```bash
-# 1. Clone repo & navigate into directory
+# 1. Clone the repo
 git clone https://github.com/soumen888/Rag-Chatbot.git
 cd Rag-Chatbot
 
-# 2. Copy & configure your environment file
+# 2. Copy and configure your environment file
 cp .env.example .env
+# Edit .env with your API keys (see Configuration section below)
 
-# 3. Build & Run interactively with Docker Compose
+# 3. Build & run interactively
 docker compose run --rm doc-chat
 ```
 
@@ -90,7 +81,7 @@ cd Rag-Chatbot
 pip install -r requirements.txt
 ```
 
-#### 3. Install Headless Browser (for JS/SPA Crawling)
+#### 3. Install Headless Browser (for JS/SPA sites)
 
 ```bash
 python -m playwright install chromium
@@ -98,23 +89,13 @@ python -m playwright install chromium
 
 #### 4. Configure Environment
 
-Copy `.env.example` to `.env`:
-
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` to select your preferred provider and add your API key:
+Open `.env` and fill in your values (see **Configuration** below).
 
-```env
-LLM_PROVIDER=google
-LLM_API_KEY=your_api_key_here
-LLM_MODEL=gemma-4-31b-it
-```
-
-*(If using **Ollama** or **LM Studio**, set `LLM_PROVIDER=ollama` — no API key required!)*
-
-#### 5. Launch the Application
+#### 5. Launch
 
 ```bash
 python main.py
@@ -122,43 +103,116 @@ python main.py
 
 ---
 
+## ⚙️ Configuration (`.env`)
+
+### Minimum Setup (Docs-only, no Telegram)
+
+```env
+LLM_PROVIDER=google
+LLM_API_KEY=your_google_ai_studio_api_key
+LLM_MODEL=gemma-4-31b-it
+```
+
+> Get a free Google AI Studio API key at [aistudio.google.com](https://aistudio.google.com)
+
+### Adding Telegram Support
+
+1. Get your Telegram API credentials at [my.telegram.org](https://my.telegram.org) → **API Development Tools**.
+
+```env
+TG_API_ID=12345678
+TG_API_HASH=your_hash_here
+
+# Channels to auto-sync (comma-separated: usernames, links, or numeric Peer IDs)
+TG_CHANNELS=@python_news, https://t.me/tech_updates, 1234567890
+
+# How many days of history to pre-fill for new channels (default: 7)
+TG_INITIAL_LOOKBACK_DAYS=7
+
+# Background sync interval in minutes (used by sync_daemon.py)
+TG_SYNC_INTERVAL_MINUTES=30
+```
+
+> On first run, the app will prompt for your phone number and a one-time Telegram login code (input is hidden). After that, the session is cached locally and no further auth is needed.
+
+---
+
 ## 💬 Usage Guide
 
-When you run `python main.py`, an interactive menu appears:
+When you run `python main.py`, the interactive menu appears:
 
 ```text
---- MENU ---
-1. Index a new documentation site (Crawl & Embed)
-2. Chat with an indexed documentation site
-3. List all indexed documentation sites
-4. Delete an indexed documentation site
+--- MAIN MENU ---
+1. Website (Crawl & Embed)
+2. Telegram (Index & 24h Summary)
+3. Chat with Knowledge Base
+4. Manage Collections (List & Delete)
 5. Exit
 ```
 
-1. **Option 1**: Enter any documentation URL (e.g. `https://fastapi.tiangolo.com/` or `https://docs.slack.dev/`).
-2. **Option 2**: Select an indexed documentation database and ask any question!
+### 1 — Website
+
+- Enter any documentation base URL (e.g. `https://fastapi.tiangolo.com/`).
+- The crawler auto-detects static vs JavaScript-rendered pages.
+- Type `back` at any prompt to return to the main menu.
+
+### 2 — Telegram
+
+Sub-options:
+- **Sync TG_CHANNELS** — Runs incremental sync on all channels configured in `.env`. Only new messages since the last sync are fetched.
+- **Index a specific channel** — Enter any username, invite link, or Peer ID.
+- **24-Hour Digest** — Get an AI-generated executive summary of the last 24 hours of any channel.
+
+### 3 — Chat
+
+Select any indexed collection (docs site or Telegram channel) and start asking questions. Every answer includes direct source URL citations or Telegram message links.
+
+Type `back` or `exit` to return to the main menu from anywhere.
+
+### 4 — Manage Collections
+
+List or delete any indexed collection.
+
+---
+
+## 🔄 Background Sync Daemon (Optional)
+
+To keep Telegram channels continuously up-to-date in the background:
+
+```bash
+python sync_daemon.py
+```
+
+This runs an infinite loop, syncing all `TG_CHANNELS` every `TG_SYNC_INTERVAL_MINUTES` minutes. Combine with Docker for a persistent background service:
+
+```bash
+docker compose up -d doc-chat-sync
+```
 
 ---
 
 ## 🔒 Security & Privacy
 
-- 🛡️ **API Key Safety**: `.env` is listed in `.gitignore` to prevent secret leaks.
-- 🔒 **Local Vector Data**: All website text chunk embeddings are generated locally. Documentation content is never sent to third-party embedding services.
-- 🔒 **Domain Lockdown**: The crawler will never traverse links outside the base URL domain.
+| Protection | Status |
+|---|---|
+| `.env` excluded from git | ✅ `.gitignore` |
+| Telegram `.session` files excluded from git | ✅ `.gitignore` |
+| Embeddings generated 100% locally | ✅ Never sent to cloud |
+| Crawler locked to base domain | ✅ Never follows external links |
+| 2FA password & OTP hidden while typing | ✅ Uses `getpass` |
+| Chunk deduplication across syncs | ✅ Content-hash IDs |
 
 ---
 
 ## 🤝 Contributing & PR Workflow
 
-Contributions are welcome! Please follow these steps:
-
-1. **Fork** the repository and create a feature branch:
+1. Fork the repository and create a feature branch:
    ```bash
    git checkout -b feature/amazing-feature
    ```
-2. Commit your changes and push to your fork.
+2. Commit your changes and push.
 3. Open a **Pull Request** targeting the `main` branch.
-4. All PRs must pass the **CI Pipeline verification checks** before merging.
+4. All PRs must pass the **CI Pipeline** before merging.
 
 ---
 
