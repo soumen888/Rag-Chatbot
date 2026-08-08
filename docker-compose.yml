@@ -15,3 +15,16 @@ services:
       # Persist ChromaDB database and crawl state caches on host machine
       - ./chroma_db:/app/chroma_db
       - ./.crawl_cache:/app/.crawl_cache
+
+  doc-chat-sync:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: doc-chat-sync
+    command: python sync_daemon.py
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./.crawl_cache:/app/.crawl_cache

@@ -217,12 +217,3 @@ class DocCrawler:
                     
         print(f"[*] Crawling finished. Successfully retrieved {len(self.visited)} new pages.")
         return self.visited
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python3 crawler.py <url>")
-        sys.exit(1)
-    crawler = DocCrawler(sys.argv[1], max_pages=5)
-    results = crawler.crawl()
-    for url, data in results.items():
-        print(f"- {data['title']}: {url}")

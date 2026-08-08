@@ -2,6 +2,7 @@ import chromadb
 from chromadb.utils import embedding_functions
 import os
 import re
+import hashlib
 
 class VectorDB:
     def __init__(self, db_path="./chroma_db"):
@@ -37,25 +38,32 @@ class VectorDB:
 
     def add_chunks(self, collection_name, chunks):
         safe_name = self.sanitize_collection_name(collection_name)
-        collection = self.get_or_create_collection(collection_name)
+        # Use safe_name directly to avoid double-sanitize
+        collection = self.client.get_or_create_collection(
+            name=safe_name,
+            embedding_function=self.embedding_function
+        )
         
         documents = []
         metadatas = []
         ids = []
         
-        for idx, chunk in enumerate(chunks):
+        for chunk in chunks:
             documents.append(chunk["text"])
             
             # ChromaDB metadata must be str, int, float, or bool
-            meta = {
-                "source": chunk["metadata"]["source"],
-                "title": chunk["metadata"]["title"],
-                "chunk_index": chunk["metadata"]["chunk_index"]
-            }
+            meta = {}
+            for k, v in chunk["metadata"].items():
+                if isinstance(v, (str, int, float, bool)):
+                    meta[k] = v
+                else:
+                    meta[k] = str(v)
             metadatas.append(meta)
             
-            # Unique ID based on collection name, page title, and chunk index
-            unique_id = f"{safe_name}_{idx}"
+            # Use content hash for globally unique, deduplication-safe IDs
+            # This ensures re-syncing the same messages won't create duplicates
+            content_hash = hashlib.md5(chunk["text"].encode()).hexdigest()[:16]
+            unique_id = f"{safe_name}_{content_hash}"
             ids.append(unique_id)
             
         # Insert in batches to prevent payload size limits
@@ -63,7 +71,7 @@ class VectorDB:
         
         print(f"[*] Storing {len(chunks)} chunks in ChromaDB collection: {safe_name}")
         for i in range(0, len(ids), batch_size):
-            collection.add(
+            collection.upsert(
                 documents=documents[i:i+batch_size],
                 metadatas=metadatas[i:i+batch_size],
                 ids=ids[i:i+batch_size]
@@ -103,24 +111,3 @@ class VectorDB:
         except Exception as e:
             print(f"[!] Error deleting collection '{safe_name}': {e}")
             return False
-
-if __name__ == "__main__":
-    db = VectorDB(db_path="./test_chroma")
-    col_name = "test-doc"
-    chunks = [
-        {"text": "Python is a programming language.", "metadata": {"source": "http://python.org", "title": "Python Home", "chunk_index": 0}},
-        {"text": "RAG stands for Retrieval-Augmented Generation.", "metadata": {"source": "http://rag.org", "title": "RAG Info", "chunk_index": 0}}
-    ]
-    db.add_chunks(col_name, chunks)
-    
-    # Query test
-    res = db.query(col_name, "What is Python?")
-    print("Query Results:")
-    for r in res:
-        print(f"- Match (dist={r['distance']}): {r['text']} [Source: {r['metadata']['source']}]")
-        
-    # List collections
-    print("Collections:", db.list_collections())
-    
-    # Delete
-    db.delete_collection(col_name)

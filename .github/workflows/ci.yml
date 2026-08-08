@@ -27,5 +27,5 @@ jobs:
 
       - name: Check Python Syntax & Imports
         run: |
-          python -m py_compile main.py crawler.py chunker.py vector_db.py chatbot.py
-          python -c "import crawler, chunker, vector_db, chatbot; print('All core modules imported successfully!')"
+          python -m py_compile main.py website/__init__.py website/crawler.py telegram/__init__.py telegram/ingestor.py core/__init__.py core/chunker.py core/vector_db.py core/chatbot.py
+          python -c "import website, telegram, core; print('All modules imported successfully!')"

@@ -6,6 +6,8 @@ requests
 python-dotenv
 playwright
 rich
+telethon
+
 
 # ─────────────────────────────────────────────────
 # LLM Provider SDKs — install ONLY what you need

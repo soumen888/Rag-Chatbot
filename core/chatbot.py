@@ -266,7 +266,7 @@ def get_provider() -> BaseLLMProvider:
 
 
 # ──────────────────────────────────────────────────────────────
-# Legacy compatibility shim (keeps existing main.py working)
+# Legacy compatibility shim
 # ──────────────────────────────────────────────────────────────
 
 class DocChatbot:
@@ -295,18 +295,3 @@ class DocChatbot:
         if not self.is_configured():
             raise ValueError("LLM provider is not configured.")
         return self._provider.generate_answer(question, context_chunks)
-
-
-if __name__ == "__main__":
-    # Quick smoke test — reads from environment
-    try:
-        provider = get_provider()
-        test_context = [
-            {
-                "text": "To create middleware in FastAPI, use the @app.middleware('http') decorator.",
-                "metadata": {"source": "https://fastapi.tiangolo.com/tutorial/middleware/", "title": "FastAPI Middleware"}
-            }
-        ]
-        print(provider.generate_answer("How do I write middleware?", test_context))
-    except Exception as e:
-        print(f"Error: {e}")

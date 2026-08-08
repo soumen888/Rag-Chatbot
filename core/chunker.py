@@ -87,27 +87,56 @@ class DocChunker:
             
         return all_chunks
 
-if __name__ == "__main__":
-    dummy_html = """
-    <html>
-      <head><title>Test Page</title></head>
-      <body>
-        <nav><a href="#">Home</a></nav>
-        <div id="sidebar">Sidebar content</div>
-        <div class="content">
-          <h1>Main Header</h1>
-          <p>This is the first paragraph of the test page. It contains some basic information that we want to retrieve.</p>
-          <h2>Second Header</h2>
-          <p>Here is another paragraph containing details about how RAG systems work. They retrieve documents and feed them to LLMs.</p>
-        </div>
-        <footer>Footer content</footer>
-      </body>
-    </html>
-    """
-    chunker = DocChunker(chunk_size=100, chunk_overlap=20)
-    crawled = {"https://example.com/test": {"html": dummy_html, "title": "Test Page"}}
-    chunks = chunker.process_pages(crawled)
-    for i, c in enumerate(chunks):
-        print(f"--- Chunk {i} ---")
-        print(f"Meta: {c['metadata']}")
-        print(f"Content:\n{c['text']}")
+    def process_telegram_messages(self, messages):
+        """
+        Groups and chunks raw Telegram messages into context-rich chunks.
+        Includes channel title, date, sender, and direct message link.
+        """
+        all_chunks = []
+        if not messages:
+            return all_chunks
+
+        # Group short consecutive messages to preserve context
+        grouped_blocks = []
+        current_block = []
+        current_len = 0
+
+        for msg in messages:
+            msg_str = f"[{msg['date_str']}] {msg['sender']}: {msg['text']}"
+            if current_len + len(msg_str) > self.chunk_size and current_block:
+                grouped_blocks.append(current_block)
+                current_block = [msg]
+                current_len = len(msg_str)
+            else:
+                current_block.append(msg)
+                current_len += len(msg_str)
+
+        if current_block:
+            grouped_blocks.append(current_block)
+
+        for i, block in enumerate(grouped_blocks):
+            first_msg = block[0]
+            combined_text = "\n".join([f"[{m['date_str']}] {m['sender']}: {m['text']}" for m in block])
+            
+            metadata = {
+                "source": first_msg["link"],
+                "title": f"Telegram ({first_msg['channel_title']})",
+                "peer_id": first_msg["peer_id"],
+                "channel_title": first_msg["channel_title"],
+                "timestamp": first_msg["timestamp"],
+                "chunk_index": i
+            }
+
+            prepended_text = (
+                f"Channel: {first_msg['channel_title']} (Peer ID: {first_msg['peer_id']})\n"
+                f"Source Link: {first_msg['link']}\n"
+                f"Date: {first_msg['date_str']}\n\n"
+                f"{combined_text}"
+            )
+
+            all_chunks.append({
+                "text": prepended_text,
+                "metadata": metadata
+            })
+
+        return all_chunks
