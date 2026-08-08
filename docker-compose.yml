@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  doc-chat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: doc-chat
+    image: doc-chat:latest
+    stdin_open: true  # Enables interactive CLI input
+    tty: true         # Allocates pseudo-TTY for rich terminal formatting
+    env_file:
+      - .env
+    volumes:
+      # Persist ChromaDB database and crawl state caches on host machine
+      - ./chroma_db:/app/chroma_db
+      - ./.crawl_cache:/app/.crawl_cache

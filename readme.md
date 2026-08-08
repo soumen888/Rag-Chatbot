@@ -57,26 +57,46 @@
 
 ## 🚀 Quick Start
 
-### 1. Clone the Repository
+### Option A: Using Docker (Recommended — No Setup Required)
+
+If you have Docker installed, you can run DocChat in seconds without installing Python, Playwright, or system packages:
+
+```bash
+# 1. Clone repo & navigate into directory
+git clone https://github.com/soumen888/Rag-Chatbot.git
+cd Rag-Chatbot
+
+# 2. Copy & configure your environment file
+cp .env.example .env
+
+# 3. Build & Run interactively with Docker Compose
+docker compose run --rm doc-chat
+```
+
+---
+
+### Option B: Local Python Installation
+
+#### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/soumen888/Rag-Chatbot.git
 cd Rag-Chatbot
 ```
 
-### 2. Install Dependencies
+#### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Install Headless Browser (for JS/SPA Crawling)
+#### 3. Install Headless Browser (for JS/SPA Crawling)
 
 ```bash
 python -m playwright install chromium
 ```
 
-### 4. Configure Environment
+#### 4. Configure Environment
 
 Copy `.env.example` to `.env`:
 
@@ -94,7 +114,7 @@ LLM_MODEL=gemma-4-31b-it
 
 *(If using **Ollama** or **LM Studio**, set `LLM_PROVIDER=ollama` — no API key required!)*
 
-### 5. Launch the Application
+#### 5. Launch the Application
 
 ```bash
 python main.py
