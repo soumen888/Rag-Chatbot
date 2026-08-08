@@ -2,7 +2,7 @@ class Ragchat < Formula
   desc "Universal Documentation RAG Chatbot for Websites, Telegram, and Discord"
   homepage "https://github.com/soumen888/Rag-Chatbot"
   url "https://github.com/soumen888/Rag-Chatbot/archive/refs/heads/main.tar.gz"
-  version "1.0.0"
+  version "3.0.0"
 
   depends_on "python@3.11"
 
