@@ -1,4 +1,4 @@
-# 🤖 RAG Chat
+# RAG Chat
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -7,7 +7,7 @@
 
 ---
 
-## ⚡ Direct Installation
+## Direct Installation
 
 ### macOS (via Homebrew)
 Install and run natively in one line:
@@ -24,19 +24,19 @@ irm https://raw.githubusercontent.com/soumen888/Rag-Chatbot/main/install.ps1 | i
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- 🌐 **Web Crawler & Parser** — Recursively crawls documentation domains, auto-detects and extracts static/SPA content (Next.js/React/Vue) using Playwright only when necessary.
-- 📱 **Telegram Syncing** — Connects via MTProto to import channels or chat histories into vector memory.
-- 💬 **Discord Ingestion Engine** — Supports stealth user token authentication and official Developer Bot integrations to index server channels, skipping categories/voice interfaces.
-- 📊 **24-Hour Summarizer** — Generates executive timeline summaries of chat activity over the past 24 hours.
-- 🧠 **Privacy-First Search** — Embeds text locally using `all-MiniLM-L6-v2` and searches with ChromaDB. Your private data never leaves your machine.
-- 🔌 **Plug-and-Play LLMs** — Works out-of-the-box with Gemini/Gemma, Ollama, LM Studio, Groq, OpenAI, and Anthropic.
-- 🖥️ **Premium Terminal UI** — Live CPU/RAM/Storage panel resource monitor, rich Markdown chat rendering, and status loaders.
+- **Web Crawler & Parser** — Recursively crawls documentation domains, auto-detects and extracts static/SPA content (Next.js/React/Vue) using Playwright only when necessary.
+- **Telegram Syncing** — Connects via MTProto to import channels or chat histories into vector memory.
+- **Discord Ingestion Engine** — Supports stealth user token authentication and official Developer Bot integrations to index server channels, skipping categories/voice interfaces.
+- **24-Hour Summarizer** — Generates executive timeline summaries of chat activity over the past 24 hours.
+- **Privacy-First Search** — Embeds text locally using `all-MiniLM-L6-v2` and searches with ChromaDB. Your private data never leaves your machine.
+- **Plug-and-Play LLMs** — Works out-of-the-box with Gemini/Gemma, Ollama, LM Studio, Groq, OpenAI, and Anthropic.
+- **Premium Terminal UI** — Live CPU/RAM/Storage panel resource monitor, rich Markdown chat rendering, and status loaders.
 
 ---
 
-## ⚙️ Configuration (`.env`)
+## Configuration (`.env`)
 
 On first launch, if no `.env` file exists, RAG Chat will run a **Setup Wizard** to configure your LLM provider.
 
@@ -60,7 +60,7 @@ DISCORD_TARGETS=1234567890:9876543210
 
 ---
 
-## 🚀 Manual Installation
+## Manual Installation
 
 If you prefer to run it manually using Python:
 
@@ -91,7 +91,7 @@ python main.py
 
 ---
 
-## 🔄 Background Syncing
+## Background Syncing
 
 To run the continuous sync daemon in the background to keep all your configured Telegram and Discord channels up-to-date:
 
@@ -101,6 +101,6 @@ python sync_daemon.py
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
