@@ -15,6 +15,9 @@ class BaseLLMProvider(ABC):
 
     def _build_prompt(self, question: str, context_chunks: list) -> tuple[str, str]:
         """Shared prompt builder. Returns (system_instruction, user_prompt)."""
+        from datetime import datetime, timezone
+        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
         context_str = ""
         for idx, chunk in enumerate(context_chunks):
             context_str += f"\n--- DOCUMENT CHUNK {idx+1} ---\n"
@@ -23,12 +26,13 @@ class BaseLLMProvider(ABC):
             context_str += f"Content:\n{chunk['text']}\n"
 
         system_instruction = (
-            "You are a helpful, expert technical documentation assistant.\n"
-            "Answer the user's question as accurately and comprehensively as possible based on the documentation context provided below.\n"
-            "You may logically reason and draw direct conclusions from the context.\n"
+            "You are a helpful, expert technical documentation and chat assistant.\n"
+            f"The current real-world time is: {now_str}.\n"
+            "Answer the user's question as accurately and comprehensively as possible based on the documentation/chat context provided below.\n"
+            "You may logically reason and draw direct conclusions from the context, keeping the current real-world time in mind when resolving relative time references (e.g. today, yesterday, last 2 hours).\n"
             "If the answer cannot be determined or inferred from the context, state: "
             "'I could not find the answer to this question in the provided documentation.' and do not invent details.\n"
-            "At the end of your answer, list all the unique Source URLs you referenced as 'Sources:'.\n"
+            "At the end of your answer, list all the unique Source URLs/links you referenced as 'Sources:'.\n"
         )
 
         user_prompt = (

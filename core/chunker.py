@@ -140,3 +140,59 @@ class DocChunker:
             })
 
         return all_chunks
+
+    def process_discord_messages(self, messages):
+        """
+        Groups and chunks raw Discord messages into context-rich chunks.
+        Includes server name, channel name, sender details, and direct jump link.
+        """
+        all_chunks = []
+        if not messages:
+            return all_chunks
+
+        # Group consecutive messages to preserve context
+        grouped_blocks = []
+        current_block = []
+        current_len = 0
+
+        for msg in messages:
+            msg_str = f"[{msg['date_str']}] {msg['sender']} ({msg['username']}): {msg['text']}"
+            if current_len + len(msg_str) > self.chunk_size and current_block:
+                grouped_blocks.append(current_block)
+                current_block = [msg]
+                current_len = len(msg_str)
+            else:
+                current_block.append(msg)
+                current_len += len(msg_str)
+
+        if current_block:
+            grouped_blocks.append(current_block)
+
+        for i, block in enumerate(grouped_blocks):
+            first_msg = block[0]
+            combined_text = "\n".join([f"[{m['date_str']}] {m['sender']} ({m['username']}): {m['text']}" for m in block])
+            
+            metadata = {
+                "source": first_msg["link"],
+                "title": f"Discord ({first_msg['server_name']} -> #{first_msg['channel_title']})",
+                "channel_id": first_msg["channel_id"],
+                "channel_title": first_msg["channel_title"],
+                "server_name": first_msg["server_name"],
+                "timestamp": first_msg["timestamp"],
+                "chunk_index": i
+            }
+
+            prepended_text = (
+                f"Server: {first_msg['server_name']}\n"
+                f"Channel: #{first_msg['channel_title']} (ID: {first_msg['channel_id']})\n"
+                f"Source Link: {first_msg['link']}\n"
+                f"Date: {first_msg['date_str']}\n\n"
+                f"{combined_text}"
+            )
+
+            all_chunks.append({
+                "text": prepended_text,
+                "metadata": metadata
+            })
+
+        return all_chunks

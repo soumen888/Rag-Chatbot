@@ -8,11 +8,12 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 
 from telegram import TelegramIngestor
-from core import DocChunker, VectorDB
+from discord import DiscordIngestor
+from core import DocChunker, VectorDB, ConfigManager
 
 def run_daemon():
     print("==================================================")
-    print("      Telegram Background Sync Daemon           ")
+    print("     DocChat Background Sync Daemon (TG & DS)     ")
     print("==================================================")
 
     auto_sync = os.environ.get("TG_AUTO_SYNC_ENABLED", "true").lower().strip() == "true"
@@ -27,18 +28,49 @@ def run_daemon():
     
     db = VectorDB()
     chunker = DocChunker()
+    cfg = ConfigManager()
 
     while True:
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"\n[────────── Daemon Sync Run at {now_str} ──────────]")
         
-        try:
-            ingestor = TelegramIngestor()
-            ingestor.sync_configured_channels(db, chunker)
-        except Exception as e:
-            print(f"[!] Sync error: {e}")
+        # 1. Sync Telegram Channels across all profiles
+        tg_profiles = cfg.load_tg_profiles()
+        if tg_profiles:
+            print(f"[*] Syncing Telegram ({len(tg_profiles)} profiles)...")
+            for profile_name, data in tg_profiles.items():
+                try:
+                    ingestor = TelegramIngestor(
+                        api_id=ConfigManager.DEFAULT_TG_API_ID,
+                        api_hash=ConfigManager.DEFAULT_TG_API_HASH,
+                        session_name=data["session_name"]
+                    )
+                    print(f"  - Profile: '{profile_name}'")
+                    ingestor.sync_configured_channels(db, chunker)
+                except Exception as e:
+                    print(f"  [!] Sync error on Telegram profile '{profile_name}': {e}")
+        else:
+            print("[*] No Telegram profiles connected. Skipping.")
 
-        print(f"[*] Sleeping for {interval_minutes} minutes until next sync...")
+        # 2. Sync Discord Channels across all profiles
+        ds_profiles = cfg.load_ds_profiles()
+        discord_targets = os.environ.get("DISCORD_TARGETS", "")
+        if ds_profiles and discord_targets:
+            print(f"[*] Syncing Discord ({len(ds_profiles)} profiles)...")
+            for profile_name, data in ds_profiles.items():
+                try:
+                    ingestor = DiscordIngestor(
+                        token=data["token"],
+                        is_bot=data["is_bot"]
+                    )
+                    print(f"  - Profile: '{profile_name}'")
+                    ingestor.sync_channels(db, chunker, discord_targets)
+                except Exception as e:
+                    print(f"  [!] Sync error on Discord profile '{profile_name}': {e}")
+        else:
+            print("[*] No Discord profiles or target channels configured. Skipping.")
+
+        print(f"\n[*] Sync cycle finished. Sleeping for {interval_minutes} minutes until next run...")
         time.sleep(interval_seconds)
 
 if __name__ == "__main__":

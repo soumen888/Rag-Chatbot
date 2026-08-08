@@ -80,12 +80,16 @@ class VectorDB:
 
     def query(self, collection_name, query_text, n_results=5):
         collection = self.get_or_create_collection(collection_name)
+        
+        # 1. Fetch semantic results
         results = collection.query(
             query_texts=[query_text],
             n_results=n_results
         )
         
         formatted_results = []
+        seen_texts = set()
+        
         if results and "documents" in results and results["documents"]:
             docs = results["documents"][0]
             metas = results["metadatas"][0]
@@ -97,6 +101,40 @@ class VectorDB:
                     "metadata": meta,
                     "distance": dist
                 })
+                seen_texts.add(doc)
+                
+        # 2. For chat logs (Telegram/Discord), also fetch the absolute latest chronological chunks
+        # This solves queries like 'latest news', 'what happened today', 'last 2H summary'
+        safe_name = self.sanitize_collection_name(collection_name)
+        if safe_name.startswith("tg_") or safe_name.startswith("ds_") or safe_name == "telegram_all":
+            try:
+                # Retrieve all items in the collection (max limit to avoid memory overhead, e.g. 100)
+                all_data = collection.get(limit=100)
+                if all_data and "documents" in all_data and all_data["documents"]:
+                    recent_items = []
+                    for doc, meta in zip(all_data["documents"], all_data["metadatas"]):
+                        if doc in seen_texts:
+                            continue
+                        recent_items.append({
+                            "text": doc,
+                            "metadata": meta,
+                            "distance": 0.0,
+                            "timestamp": int(meta.get("timestamp", 0))
+                        })
+                    
+                    # Sort by timestamp descending (newest first)
+                    recent_items.sort(key=lambda x: x["timestamp"], reverse=True)
+                    
+                    # Append the top 5 newest chunks to the context
+                    for item in recent_items[:5]:
+                        formatted_results.append({
+                            "text": item["text"],
+                            "metadata": item["metadata"],
+                            "distance": item["distance"]
+                        })
+            except Exception:
+                pass
+                
         return formatted_results
 
     def list_collections(self):

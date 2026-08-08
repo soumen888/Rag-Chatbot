@@ -1,218 +1,102 @@
-# 🤖 Universal Documentation Chatbot (RAG)
+# 🤖 RAG Chat
 
-[![Release](https://img.shields.io/github/v/release/soumen888/Rag-Chatbot?color=orange)](https://github.com/soumen888/Rag-Chatbot/releases)
-[![CI Pipeline](https://github.com/soumen888/Rag-Chatbot/actions/workflows/ci.yml/badge.svg)](https://github.com/soumen888/Rag-Chatbot/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-> **Talk to any documentation website or Telegram channel using AI.** Crawls docs sites and indexes Telegram channels into a local vector database, then answers your questions using any cloud or local LLM — with exact source URL citations.
+> **An intelligent terminal RAG companion for websites, Telegram channels, and Discord servers.** Crawls and embeds documentation sites, links stealth users or bots to index chat channels, and lets you chat with your local database using any cloud or local LLM.
+
+---
+
+## ⚡ Direct Installation (macOS)
+
+The easiest way to install RAG Chat natively on macOS is via Homebrew:
+
+```bash
+# Install directly from the repository tap in a single command
+brew install soumen888/Rag-Chatbot/ragchat
+```
+
+Once installed, simply run the following command in your terminal:
+```bash
+ragchat
+```
 
 ---
 
 ## ✨ Key Features
 
-- 🌐 **Universal Web Crawler** — Point it at any documentation URL. Recursively crawls sub-pages, stays strictly on-domain, and filters out media assets.
-
-- ⚡ **Adaptive JavaScript & SPA Engine** — Auto-detects if a site needs Playwright headless Chromium (React/Next.js/Vue) or fast `requests`. Uses Playwright only when needed.
-
-- 📜 **Infinite Scroll & Lazy-Load Handling** — Scrolls and waits for network idle before extracting content, so nothing is missed.
-
-- 💾 **Stateful Resume & Incremental Indexing** — Pause and resume crawls anytime. Skips already-visited pages automatically.
-
-- 📱 **Telegram Channel Ingestion** — Connects via MTProto (Telethon). Accepts any channel username, invite link, or numeric Peer ID. Indexes historical messages into vector memory.
-
-- 📊 **24-Hour Executive Digest** — Generates a structured AI summary of everything discussed in a Telegram channel over the past 24 hours, with clickable message links.
-
-- 🔌 **Bring Your Own LLM (Cloud or Local)** — Switch between providers in `.env` without touching any code (see table below).
-
-- 🧠 **Privacy-First Local Vector Search** — Embeddings are generated locally using `all-MiniLM-L6-v2` and stored in ChromaDB. Your content never leaves your machine.
-
-- 🖥️ **Clean Interactive Terminal UI** — Modular menu with sub-sections, rich Markdown responses, and `back` navigation from any prompt.
-
----
-
-## ⚙️ Supported LLM Providers
-
-| Provider | `LLM_PROVIDER` | API Key Required? | Default Model |
-|---|---|---|---|
-| **Google AI Studio** *(Default)* | `google` | Yes | `gemma-4-31b-it` |
-| **Ollama** *(Local)* | `ollama` | ❌ No | `llama3` |
-| **LM Studio** *(Local)* | `lmstudio` | ❌ No | `local-model` |
-| **OpenAI** | `openai` | Yes | `gpt-4o-mini` |
-| **Groq Cloud** | `groq` | Yes | `llama-3.3-70b-versatile` |
-| **Anthropic** | `anthropic` | Yes | `claude-3-5-sonnet-20241022` |
-| **Together AI** | `together` | Yes | `meta-llama/Llama-3-8b-chat-hf` |
-| **Mistral AI** | `mistral` | Yes | `mistral-small-latest` |
-| **Custom OpenAI API** | `custom` | Optional | Set via `LLM_MODEL` & `LLM_BASE_URL` |
-
----
-
-## 🚀 Quick Start
-
-### Option A: Docker (Recommended — No Python Setup Required)
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/soumen888/Rag-Chatbot.git
-cd Rag-Chatbot
-
-# 2. Copy and configure your environment file
-cp .env.example .env
-# Edit .env with your API keys (see Configuration section below)
-
-# 3. Build & run interactively
-docker compose run --rm doc-chat
-```
-
----
-
-### Option B: Local Python Installation
-
-#### 1. Clone the Repository
-
-```bash
-git clone https://github.com/soumen888/Rag-Chatbot.git
-cd Rag-Chatbot
-```
-
-#### 2. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-#### 3. Install Headless Browser (for JS/SPA sites)
-
-```bash
-python -m playwright install chromium
-```
-
-#### 4. Configure Environment
-
-```bash
-cp .env.example .env
-```
-
-Open `.env` and fill in your values (see **Configuration** below).
-
-#### 5. Launch
-
-```bash
-python main.py
-```
+- 🌐 **Web Crawler & Parser** — Recursively crawls documentation domains, auto-detects and extracts static/SPA content (Next.js/React/Vue) using Playwright only when necessary.
+- 📱 **Telegram Syncing** — Connects via MTProto to import channels or chat histories into vector memory.
+- 💬 **Discord Ingestion Engine** — Supports stealth user token authentication and official Developer Bot integrations to index server channels, skipping categories/voice interfaces.
+- 📊 **24-Hour Summarizer** — Generates executive timeline summaries of chat activity over the past 24 hours.
+- 🧠 **Privacy-First Search** — Embeds text locally using `all-MiniLM-L6-v2` and searches with ChromaDB. Your private data never leaves your machine.
+- 🔌 **Plug-and-Play LLMs** — Works out-of-the-box with Gemini/Gemma, Ollama, LM Studio, Groq, OpenAI, and Anthropic.
+- 🖥️ **Premium Terminal UI** — Live CPU/RAM/Storage panel resource monitor, rich Markdown chat rendering, and status loaders.
 
 ---
 
 ## ⚙️ Configuration (`.env`)
 
-### Minimum Setup (Docs-only, no Telegram)
+On first launch, if no `.env` file exists, RAG Chat will run a **Setup Wizard** to configure your LLM provider.
+
+To manually configure your integrations, create a `.env` file in the root:
 
 ```env
+# LLM Configuration
 LLM_PROVIDER=google
 LLM_API_KEY=your_google_ai_studio_api_key
 LLM_MODEL=gemma-4-31b-it
-```
 
-> Get a free Google AI Studio API key at [aistudio.google.com](https://aistudio.google.com)
-
-### Adding Telegram Support
-
-1. Get your Telegram API credentials at [my.telegram.org](https://my.telegram.org) → **API Development Tools**.
-
-```env
+# Telegram Credentials (from my.telegram.org)
 TG_API_ID=12345678
 TG_API_HASH=your_hash_here
-
-# Channels to auto-sync (comma-separated: usernames, links, or numeric Peer IDs)
-TG_CHANNELS=@python_news, https://t.me/tech_updates, 1234567890
-
-# How many days of history to pre-fill for new channels (default: 7)
+TG_CHANNELS=@watcher_guru,https://t.me/cointelegraph
 TG_INITIAL_LOOKBACK_DAYS=7
 
-# Background sync interval in minutes (used by sync_daemon.py)
-TG_SYNC_INTERVAL_MINUTES=30
+# Discord Settings (Guild IDs and Channels to auto-sync)
+DISCORD_TARGETS=1234567890:9876543210
 ```
-
-> On first run, the app will prompt for your phone number and a one-time Telegram login code (input is hidden). After that, the session is cached locally and no further auth is needed.
 
 ---
 
-## 💬 Usage Guide
+## 🚀 Manual Installation
 
-When you run `python main.py`, the interactive menu appears:
+If you prefer to run it manually using Python:
 
-```text
---- MAIN MENU ---
-1. Website (Crawl & Embed)
-2. Telegram (Index & 24h Summary)
-3. Chat with Knowledge Base
-4. Manage Collections (List & Delete)
-5. Exit
+### macOS & Linux
+```bash
+# 1. Clone the repository
+git clone https://github.com/soumen888/Rag-Chatbot.git
+cd Rag-Chatbot
+
+# 2. Install dependencies
+pip install -r requirements.txt
+python -m playwright install chromium
+
+# 3. Launch RAG Chat
+python main.py
 ```
 
-### 1 — Website
-
-- Enter any documentation base URL (e.g. `https://fastapi.tiangolo.com/`).
-- The crawler auto-detects static vs JavaScript-rendered pages.
-- Type `back` at any prompt to return to the main menu.
-
-### 2 — Telegram
-
-Sub-options:
-- **Sync TG_CHANNELS** — Runs incremental sync on all channels configured in `.env`. Only new messages since the last sync are fetched.
-- **Index a specific channel** — Enter any username, invite link, or Peer ID.
-- **24-Hour Digest** — Get an AI-generated executive summary of the last 24 hours of any channel.
-
-### 3 — Chat
-
-Select any indexed collection (docs site or Telegram channel) and start asking questions. Every answer includes direct source URL citations or Telegram message links.
-
-Type `back` or `exit` to return to the main menu from anywhere.
-
-### 4 — Manage Collections
-
-List or delete any indexed collection.
+### Windows
+```powershell
+git clone https://github.com/soumen888/Rag-Chatbot.git
+cd Rag-Chatbot
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+python -m playwright install chromium
+python main.py
+```
 
 ---
 
-## 🔄 Background Sync Daemon (Optional)
+## 🔄 Background Syncing
 
-To keep Telegram channels continuously up-to-date in the background:
+To run the continuous sync daemon in the background to keep all your configured Telegram and Discord channels up-to-date:
 
 ```bash
 python sync_daemon.py
 ```
-
-This runs an infinite loop, syncing all `TG_CHANNELS` every `TG_SYNC_INTERVAL_MINUTES` minutes. Combine with Docker for a persistent background service:
-
-```bash
-docker compose up -d doc-chat-sync
-```
-
----
-
-## 🔒 Security & Privacy
-
-| Protection | Status |
-|---|---|
-| `.env` excluded from git | ✅ `.gitignore` |
-| Telegram `.session` files excluded from git | ✅ `.gitignore` |
-| Embeddings generated 100% locally | ✅ Never sent to cloud |
-| Crawler locked to base domain | ✅ Never follows external links |
-| 2FA password & OTP hidden while typing | ✅ Uses `getpass` |
-| Chunk deduplication across syncs | ✅ Content-hash IDs |
-
----
-
-## 🤝 Contributing & PR Workflow
-
-1. Fork the repository and create a feature branch:
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-2. Commit your changes and push.
-3. Open a **Pull Request** targeting the `main` branch.
-4. All PRs must pass the **CI Pipeline** before merging.
 
 ---
 
