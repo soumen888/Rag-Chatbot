@@ -45,7 +45,10 @@ jobs:
 
       - name: Install Rag-Chatbot via Homebrew
         run: |
-          brew install Formula/ragchat.rb
+          brew tap-new local/test
+          mkdir -p "$(brew --repository local/test)/Formula"
+          cp Formula/ragchat.rb "$(brew --repository local/test)/Formula/ragchat.rb"
+          brew install local/test/ragchat
 
       - name: Verify Installation
         run: |
