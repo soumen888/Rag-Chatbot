@@ -15,7 +15,7 @@ class Ragchat < Formula
 
     # Install Python requirements
     system "#{libexec}/venv/bin/pip", "install", "--upgrade", "pip"
-    system "#{libexec}/venv/bin/pip", "install", "-r", "#{libexec}/requirements.txt"
+    system "#{libexec}/venv/bin/pip", "install", "--prefer-binary", "-r", "#{libexec}/requirements.txt"
 
     # Create a native executable wrapper in the bin directory
     (bin/"ragchat").write <<~EOS
