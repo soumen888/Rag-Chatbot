@@ -54,16 +54,11 @@ pip install -r requirements.txt --quiet
 echo "[*] Setting up web crawler..."
 python3 -m playwright install chromium > /dev/null 2>&1 || true
 
-# 5. Global Command Link Setup
-INSTALL_BIN="/usr/local/bin"
-if [ ! -w "$INSTALL_BIN" ]; then
-    INSTALL_BIN="$BIN_DIR"
-    mkdir -p "$INSTALL_BIN"
-fi
+# Create executable launcher script in user-writable ~/.local/bin
+mkdir -p "$BIN_DIR"
+LAUNCHER="$BIN_DIR/ragchat"
 
-LAUNCHER="$INSTALL_BIN/ragchat"
-
-cat << 'EOF' > "$LAUNCHER" 2>/dev/null || sudo cat << 'EOF' > "$LAUNCHER"
+cat << 'EOF' > "$LAUNCHER"
 #!/usr/bin/env bash
 INSTALL_DIR="$HOME/.ragchat"
 if [ -d "$INSTALL_DIR" ]; then
@@ -75,7 +70,7 @@ else
 fi
 EOF
 
-chmod +x "$LAUNCHER" 2>/dev/null || sudo chmod +x "$LAUNCHER"
+chmod 755 "$LAUNCHER"
 
 # Persistent PATH addition
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
