@@ -1,7 +1,6 @@
 # Core dependencies (always required)
 chromadb
-orjson>=3.9.0
-sentence-transformers
+onnxruntime
 beautifulsoup4
 requests
 python-dotenv
@@ -9,6 +8,7 @@ playwright
 rich
 telethon
 psutil
+pyinstaller
 
 
 # ─────────────────────────────────────────────────

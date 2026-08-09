@@ -5,6 +5,7 @@ class Ragchat < Formula
   version "3.0.0"
 
   depends_on "python@3.11"
+  depends_on "rust" => :build
 
   # Prevents Homebrew from trying to relocate Python native extensions
   # (e.g. orjson) inside the venv, which fails due to Mach-O header size limits
@@ -18,8 +19,10 @@ class Ragchat < Formula
     system "python3.11", "-m", "venv", "#{libexec}/venv"
 
     # Install Python requirements
+    # We compile orjson from source with extra header padding so Homebrew can relocate its dylibs
+    ENV["LDFLAGS"] = "-Wl,-headerpad_max_install_names"
     system "#{libexec}/venv/bin/pip", "install", "--upgrade", "pip"
-    system "#{libexec}/venv/bin/pip", "install", "--prefer-binary", "-r", "#{libexec}/requirements.txt"
+    system "#{libexec}/venv/bin/pip", "install", "--no-binary", "orjson", "-r", "#{libexec}/requirements.txt"
 
     # Create a native executable wrapper in the bin directory
     (bin/"ragchat").write <<~EOS
@@ -31,6 +34,6 @@ class Ragchat < Formula
 
   test do
     # Simple check to see if the command responds
-    assert_match "MAIN MENU", shell_output("#{bin}/ragchat --help", 1)
+    assert_match "Universal Documentation Chat", shell_output("#{bin}/ragchat", 1)
   end
 end
