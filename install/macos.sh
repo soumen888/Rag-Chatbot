@@ -64,11 +64,17 @@ pip install -r requirements.txt --quiet
 echo "[*] Setting up web crawler headless browser..."
 python3 -m playwright install chromium > /dev/null 2>&1 || true
 
-# Create executable launcher script
-mkdir -p "$BIN_DIR"
-LAUNCHER="$BIN_DIR/ragchat"
+# Select installation target for global binary launcher
+# /usr/local/bin is default in macOS $PATH out-of-the-box
+INSTALL_BIN="/usr/local/bin"
+if [ ! -w "$INSTALL_BIN" ]; then
+    INSTALL_BIN="$BIN_DIR"
+    mkdir -p "$INSTALL_BIN"
+fi
 
-cat << 'EOF' > "$LAUNCHER"
+LAUNCHER="$INSTALL_BIN/ragchat"
+
+cat << 'EOF' > "$LAUNCHER" 2>/dev/null || sudo cat << 'EOF' > "$LAUNCHER"
 #!/usr/bin/env bash
 INSTALL_DIR="$HOME/.ragchat"
 if [ -d "$INSTALL_DIR" ]; then
@@ -80,20 +86,18 @@ else
 fi
 EOF
 
-chmod +x "$LAUNCHER"
+chmod +x "$LAUNCHER" 2>/dev/null || sudo chmod +x "$LAUNCHER"
 
-# Auto-add BIN_DIR to PATH in shell profiles if missing
+# Also register ~/.local/bin in shell profiles just in case
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
     for PROFILE in "$HOME/.zshrc" "$HOME/.bash_profile" "$HOME/.bashrc"; do
         if [ -f "$PROFILE" ] || [ "$(basename "$PROFILE")" = ".zshrc" ]; then
             if ! grep -q "$BIN_DIR" "$PROFILE" 2>/dev/null; then
                 echo "" >> "$PROFILE"
                 echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$PROFILE"
-                echo "[*] Added $BIN_DIR to $PROFILE"
             fi
         fi
     done
-    export PATH="$HOME/.local/bin:$PATH"
 fi
 
 echo ""
