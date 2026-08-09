@@ -17,7 +17,7 @@ curl -fsSL https://raw.githubusercontent.com/soumen888/homebrew-ragchat/main/ins
 
 ### macOS (via Homebrew)
 ```bash
-brew install soumen888/ragchat/ragchat && ragchat
+brew install soumen888/ragchat/ragchat
 ```
 
 ### Windows (via PowerShell)
