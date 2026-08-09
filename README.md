@@ -26,7 +26,12 @@ ragchat
 If you use Homebrew on macOS or Linux:
 
 ```bash
-brew tap soumen888/tap
+brew install soumen888/ragchat/ragchat
+```
+
+Or via explicit tap:
+```bash
+brew tap soumen888/ragchat
 brew install ragchat
 ```
 
