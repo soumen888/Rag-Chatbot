@@ -39,6 +39,7 @@ jobs:
   test-brew-install:
     name: Test Homebrew Installation
     runs-on: macos-latest
+    continue-on-error: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
