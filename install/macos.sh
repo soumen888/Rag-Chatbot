@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# RAGChat Installer Script for macOS & Linux
-# Installs RAGChat via Git clone or zip download, sets up Python virtualenv, installs dependencies, and creates a global 'ragchat' command.
-
+# RAGChat Universal Installer for macOS & Linux
 set -e
 
 REPO_URL="https://github.com/soumen888/Rag-Chatbot.git"
@@ -9,13 +7,12 @@ INSTALL_DIR="$HOME/.ragchat"
 BIN_DIR="$HOME/.local/bin"
 
 echo "=================================================="
-echo "          RAGChat Universal Installer             "
+echo "          Installing RAGChat                      "
 echo "=================================================="
 
-# Check Python 3 & minimum version (3.9+)
+# 1. Check Python
 if ! command -v python3 &> /dev/null; then
-    echo "[!] Python 3 is required but not installed."
-    echo "    Please download and install Python 3.9+ from: https://www.python.org/downloads/"
+    echo "[!] Python 3 is required. Download at: https://www.python.org/downloads/"
     exit 1
 fi
 
@@ -23,52 +20,51 @@ PYTHON_MAJOR=$(python3 -c 'import sys; print(sys.version_info.major)')
 PYTHON_MINOR=$(python3 -c 'import sys; print(sys.version_info.minor)')
 
 if [ "$PYTHON_MAJOR" -lt 3 ] || [ "$PYTHON_MINOR" -lt 9 ]; then
-    echo "[!] Outdated Python version detected: $PYTHON_MAJOR.$PYTHON_MINOR"
-    echo "    RAGChat requires Python 3.9 or higher."
-    echo "    Please upgrade Python from official site: https://www.python.org/downloads/"
+    echo "[!] RAGChat requires Python 3.9+. Please upgrade at: https://www.python.org/downloads/"
     exit 1
 fi
 
-echo "[+] Detected Python $PYTHON_MAJOR.$PYTHON_MINOR (Compatible)"
-
-# Clone or Update Repository
+# 2. Download / Clone Repository
+echo "[*] Downloading application packages..."
 if [ -d "$INSTALL_DIR" ]; then
-    echo "[*] Updating existing RAGChat installation in $INSTALL_DIR..."
     cd "$INSTALL_DIR"
     if [ -d ".git" ]; then
         git pull --quiet
     fi
 else
-    echo "[*] Installing RAGChat to $INSTALL_DIR..."
     if command -v git &> /dev/null; then
         git clone --quiet "$REPO_URL" "$INSTALL_DIR"
     else
         mkdir -p "$INSTALL_DIR"
-        curl -fsSL https://github.com/soumen888/Rag-Chatbot/archive/refs/heads/main.tar.gz | tar -xz -C "$INSTALL_DIR" --strip-components=1
+        curl -# -L "https://github.com/soumen888/Rag-Chatbot/archive/refs/heads/main.tar.gz" | tar -xz -C "$INSTALL_DIR" --strip-components=1
     fi
 fi
 
 cd "$INSTALL_DIR"
 
-# Create Virtual Environment
-echo "[*] Setting up Python virtual environment..."
+# 3. Setup Virtual Environment & Install Dependencies with Progress
+echo "[*] Setting up environment & dependencies..."
 python3 -m venv venv
 source venv/bin/activate
 
-# Install Dependencies
-echo "[*] Installing required dependencies (LiteLLM, ChromaDB, etc.)..."
+# Progress bar indicator during pip installation
 pip install --upgrade pip --quiet
-pip install -r requirements.txt --quiet
+pip install -r requirements.txt --progress-bar on
 
-# Playwright Browsers setup
-echo "[*] Setting up web crawler headless browser..."
-python3 -m playwright install chromium --quiet || true
+# 4. Playwright Headless Setup
+echo "[*] Setting up web crawler..."
+python3 -m playwright install chromium > /dev/null 2>&1 || true
 
-# Create executable launcher script
-mkdir -p "$BIN_DIR"
-LAUNCHER="$BIN_DIR/ragchat"
+# 5. Global Command Link Setup
+INSTALL_BIN="/usr/local/bin"
+if [ ! -w "$INSTALL_BIN" ]; then
+    INSTALL_BIN="$BIN_DIR"
+    mkdir -p "$INSTALL_BIN"
+fi
 
-cat << 'EOF' > "$LAUNCHER"
+LAUNCHER="$INSTALL_BIN/ragchat"
+
+cat << 'EOF' > "$LAUNCHER" 2>/dev/null || sudo cat << 'EOF' > "$LAUNCHER"
 #!/usr/bin/env bash
 INSTALL_DIR="$HOME/.ragchat"
 if [ -d "$INSTALL_DIR" ]; then
@@ -80,20 +76,24 @@ else
 fi
 EOF
 
-chmod +x "$LAUNCHER"
+chmod +x "$LAUNCHER" 2>/dev/null || sudo chmod +x "$LAUNCHER"
 
-echo ""
-echo "=================================================="
-echo "        RAGChat Installed Successfully!           "
-echo "=================================================="
-echo ""
-echo "You can now run RAGChat by typing:"
-echo "  ragchat"
-echo ""
-
-# Check if ~/.local/bin is in PATH
+# Persistent PATH addition
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
-    echo "Note: Add $BIN_DIR to your PATH if 'ragchat' command is not recognized:"
-    echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
-    echo ""
+    for PROFILE in "$HOME/.zshrc" "$HOME/.bash_profile" "$HOME/.bashrc"; do
+        if [ -f "$PROFILE" ] || [ "$(basename "$PROFILE")" = ".zshrc" ]; then
+            if ! grep -q "$BIN_DIR" "$PROFILE" 2>/dev/null; then
+                echo "" >> "$PROFILE"
+                echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$PROFILE"
+            fi
+        fi
+    done
 fi
+
+echo ""
+echo "=================================================="
+echo "  [+] RAGChat installed successfully!             "
+echo "  [+] Run command:  ragchat                       "
+echo "=================================================="
+echo ""
+
