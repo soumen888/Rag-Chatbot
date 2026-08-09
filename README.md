@@ -1,12 +1,6 @@
-# Universal Documentation & Community Chatbot (RAGChat)
-
-Terminal-based RAG assistant that ingests technical documentation, Telegram channels, and Discord communities to answer questions with precise citations.
-
 ## Installation
 
 ### Option 1: curl (macOS / Linux)
-
-Run the one-liner installer in terminal:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/soumen888/Rag-Chatbot/main/install/macos.sh | bash

@@ -82,22 +82,17 @@ EOF
 
 chmod +x "$LAUNCHER"
 
-# Auto-add BIN_DIR to PATH in shell profile if missing
+# Auto-add BIN_DIR to PATH in shell profiles if missing
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
-    SHELL_PROFILE=""
-    if [ -n "$ZSH_VERSION" ] || [ -f "$HOME/.zshrc" ]; then
-        SHELL_PROFILE="$HOME/.zshrc"
-    elif [ -f "$HOME/.bashrc" ]; then
-        SHELL_PROFILE="$HOME/.bashrc"
-    fi
-
-    if [ -n "$SHELL_PROFILE" ]; then
-        if ! grep -q "$BIN_DIR" "$SHELL_PROFILE" 2>/dev/null; then
-            echo "" >> "$SHELL_PROFILE"
-            echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> "$SHELL_PROFILE"
-            echo "[*] Added $BIN_DIR to $SHELL_PROFILE"
+    for PROFILE in "$HOME/.zshrc" "$HOME/.bash_profile" "$HOME/.bashrc"; do
+        if [ -f "$PROFILE" ] || [ "$(basename "$PROFILE")" = ".zshrc" ]; then
+            if ! grep -q "$BIN_DIR" "$PROFILE" 2>/dev/null; then
+                echo "" >> "$PROFILE"
+                echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$PROFILE"
+                echo "[*] Added $BIN_DIR to $PROFILE"
+            fi
         fi
-    fi
+    done
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
