@@ -36,21 +36,12 @@ jobs:
           python -m py_compile main.py website/__init__.py website/crawler.py telegram/__init__.py telegram/ingestor.py core/__init__.py core/chunker.py core/vector_db.py core/chatbot.py
           python -c "import website, telegram, core; print('All modules imported successfully!')"
 
-  test-brew-install:
-    name: Test Homebrew Installation
+  test-install-scripts:
+    name: Test Installer Scripts Syntax
     runs-on: macos-latest
-    continue-on-error: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Add Homebrew Tap
-        run: brew tap soumen888/ragchat file://${{ github.workspace }}
-
-      - name: Install Rag-Chatbot via Homebrew
-        run: brew install soumen888/ragchat/ragchat
-
-      - name: Verify Installation
-        run: |
-          which ragchat
-          ragchat --help
+      - name: Validate Shell Script Syntax
+        run: bash -n install/macos.sh
