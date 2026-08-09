@@ -43,12 +43,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Add Homebrew Tap
+        run: brew tap soumen888/ragchat file://${{ github.workspace }}
+
       - name: Install Rag-Chatbot via Homebrew
-        run: |
-          brew tap-new local/test
-          mkdir -p "$(brew --repository local/test)/Formula"
-          cp Formula/ragchat.rb "$(brew --repository local/test)/Formula/ragchat.rb"
-          brew install local/test/ragchat
+        run: brew install soumen888/ragchat/ragchat
 
       - name: Verify Installation
         run: |
