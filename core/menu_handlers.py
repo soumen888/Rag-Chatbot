@@ -68,8 +68,13 @@ def interactive_setup_wizard(cfg):
         name = PROVIDER_INFO[p]["name"]
         default_model = PROVIDER_INFO[p]["model_default"]
         print(f"{idx + 1}. {name} (Default: {default_model})")
+    print("0. Skip setup for now")
         
-    choice = input(f"Select provider (1-{len(providers)}): ").strip()
+    choice = input(f"Select provider (0-{len(providers)}) or 'skip': ").strip().lower()
+    if choice in ["0", "skip", "s"]:
+        print("[*] Setup skipped. You can configure your provider anytime under Settings (Option 6).")
+        return
+
     if not choice.isdigit() or int(choice) < 1 or int(choice) > len(providers):
         print("[!] Invalid choice. Defaulting to Google AI Studio.")
         selected = "google"
