@@ -18,8 +18,10 @@ class Ragchat < Formula
     system "python3.11", "-m", "venv", "#{libexec}/venv"
 
     # Install Python requirements
+    # We compile orjson from source with extra header padding so Homebrew can relocate its dylibs
+    ENV["LDFLAGS"] = "-Wl,-headerpad_max_install_names"
     system "#{libexec}/venv/bin/pip", "install", "--upgrade", "pip"
-    system "#{libexec}/venv/bin/pip", "install", "--prefer-binary", "-r", "#{libexec}/requirements.txt"
+    system "#{libexec}/venv/bin/pip", "install", "--no-binary", "orjson", "-r", "#{libexec}/requirements.txt"
 
     # Create a native executable wrapper in the bin directory
     (bin/"ragchat").write <<~EOS

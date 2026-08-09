@@ -48,12 +48,9 @@ jobs:
         run: brew tap soumen888/ragchat file://${{ github.workspace }}
 
       - name: Install Rag-Chatbot via Homebrew
-        # The formula installs successfully (1.5GB+) but Homebrew warns about
-        # orjson's Mach-O header during dylib relocation (a known pip venv issue).
-        # We allow the warning exit code and verify the binary works below.
-        run: brew install soumen888/ragchat/ragchat || true
+        run: brew install soumen888/ragchat/ragchat
 
       - name: Verify Installation
         run: |
-          which ragchat && echo "✅ ragchat binary found" || echo "❌ ragchat not found"
-          ragchat --help || true
+          which ragchat
+          ragchat --help
