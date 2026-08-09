@@ -10,6 +10,8 @@ class Ragchat < Formula
 
   depends_on "python@3.11"
 
+  include Language::Python::Virtualenv
+
   def install
     venv = virtualenv_create(libexec, "python3.11")
     venv.pip_install resources
