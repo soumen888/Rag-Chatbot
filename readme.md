@@ -9,16 +9,21 @@
 
 ## Direct Installation
 
-### macOS (via Homebrew)
-Install and run natively in one line:
+### macOS & Linux (One-Line Installer)
+Open your terminal and run:
 ```bash
-brew install soumen888/ragchat/ragchat
+curl -fsSL https://raw.githubusercontent.com/soumen888/homebrew-ragchat/main/install.sh | bash
+```
+
+### macOS (via Homebrew)
+```bash
+brew install soumen888/ragchat/ragchat && ragchat
 ```
 
 ### Windows (via PowerShell)
 Open PowerShell (as Administrator) and run:
 ```powershell
-irm https://raw.githubusercontent.com/soumen888/Rag-Chatbot/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/soumen888/homebrew-ragchat/main/install.ps1 | iex
 ```
 *(Once installed, open a new terminal window and type `ragchat` to run).*
 

@@ -9,11 +9,9 @@ class VectorDB:
         self.db_path = db_path
         self.client = chromadb.PersistentClient(path=self.db_path)
         
-        # Use sentence-transformers locally
-        print("[*] Loading local embedding model (all-MiniLM-L6-v2)...")
-        self.embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name="all-MiniLM-L6-v2"
-        )
+        # Use ONNX version of all-MiniLM-L6-v2 (fast & lightweight, no PyTorch needed)
+        print("[*] Loading ONNX embedding model (all-MiniLM-L6-v2)...")
+        self.embedding_function = embedding_functions.ONNXMiniLM_L6_V2EmbeddingFunction()
 
     def sanitize_collection_name(self, name):
         # ChromaDB collection names must be 3-63 chars, alphanumeric or _ or -
