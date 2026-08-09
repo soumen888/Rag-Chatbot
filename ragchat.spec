@@ -8,6 +8,8 @@ block_cipher = None
 datas = []
 datas += collect_data_files('chromadb')
 datas += collect_data_files('onnxruntime')
+datas += collect_data_files('rfc3987_syntax')
+datas += collect_data_files('jsonschema')
 datas += copy_metadata('chromadb')
 datas += copy_metadata('onnxruntime')
 datas += copy_metadata('tqdm')
@@ -45,7 +47,22 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=[
+        'torch',
+        'torchvision',
+        'torchaudio',
+        'matplotlib',
+        'scipy',
+        'sklearn',
+        'PIL',
+        'Pillow',
+        'sqlalchemy',
+        'fastparquet',
+        'pandas',
+        'sympy',
+        'notebook',
+        'IPython',
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
