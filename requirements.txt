@@ -8,6 +8,7 @@ playwright
 rich
 telethon
 psutil
+rfc3987
 
 # Universal LLM Provider Interface (Gemini, OpenAI, Anthropic, Groq, Ollama, etc.)
 litellm
