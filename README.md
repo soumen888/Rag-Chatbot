@@ -1,7 +1,3 @@
-# Universal Documentation & Community Chatbot (RAGChat)
-
-Terminal-based RAG assistant that ingests technical documentation, Telegram channels, and Discord communities to answer questions with precise citations.
-
 ## Installation
 
 ### Option 1: curl (macOS / Linux)
