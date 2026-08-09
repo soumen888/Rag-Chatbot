@@ -15,7 +15,7 @@ echo "=================================================="
 # Check Python 3 & minimum version (3.9+)
 if ! command -v python3 &> /dev/null; then
     echo "[!] Python 3 is required but not installed."
-    echo "    Please install Python 3.9+ (e.g. brew install python@3.11 or from https://www.python.org)"
+    echo "    Please download and install Python 3.9+ from: https://www.python.org/downloads/"
     exit 1
 fi
 
@@ -25,7 +25,7 @@ PYTHON_MINOR=$(python3 -c 'import sys; print(sys.version_info.minor)')
 if [ "$PYTHON_MAJOR" -lt 3 ] || [ "$PYTHON_MINOR" -lt 9 ]; then
     echo "[!] Outdated Python version detected: $PYTHON_MAJOR.$PYTHON_MINOR"
     echo "    RAGChat requires Python 3.9 or higher."
-    echo "    Please upgrade Python (e.g. 'brew install python@3.11') and try again."
+    echo "    Please upgrade Python from official site: https://www.python.org/downloads/"
     exit 1
 fi
 
