@@ -12,7 +12,7 @@
 ### macOS & Linux (One-Line Installer)
 Open your terminal and run:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/soumen888/homebrew-ragchat/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/soumen888/homebrew-ragchat/main/install/macos.sh | bash
 ```
 
 ### macOS (via Homebrew)
@@ -23,7 +23,7 @@ brew install soumen888/ragchat/ragchat
 ### Windows (via PowerShell)
 Open PowerShell (as Administrator) and run:
 ```powershell
-irm https://raw.githubusercontent.com/soumen888/homebrew-ragchat/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/soumen888/homebrew-ragchat/main/install/windows.ps1 | iex
 ```
 *(Once installed, open a new terminal window and type `ragchat` to run).*
 
