@@ -40,9 +40,12 @@ jobs:
     name: Test Homebrew Installation
     runs-on: macos-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Install Rag-Chatbot via Homebrew
         run: |
-          brew install soumen888/Rag-Chatbot/ragchat
+          brew install Formula/ragchat.rb
 
       - name: Verify Installation
         run: |
