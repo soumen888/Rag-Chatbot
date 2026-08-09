@@ -42,14 +42,13 @@ fi
 
 cd "$INSTALL_DIR"
 
-# 3. Setup Virtual Environment & Install Dependencies with Progress
+# 3. Setup Virtual Environment & Install Dependencies
 echo "[*] Setting up environment & dependencies..."
 python3 -m venv venv
 source venv/bin/activate
 
-# Progress bar indicator during pip installation
-pip install --upgrade pip --quiet
-pip install -r requirements.txt --progress-bar on
+pip install --upgrade pip > /dev/null 2>&1
+pip install -r requirements.txt --quiet
 
 # 4. Playwright Headless Setup
 echo "[*] Setting up web crawler..."
