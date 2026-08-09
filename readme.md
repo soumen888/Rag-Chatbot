@@ -12,7 +12,7 @@
 ### macOS (via Homebrew)
 Install and run natively in one line:
 ```bash
-brew install soumen888/Rag-Chatbot/ragchat && ragchat
+brew install soumen888/ragchat/ragchat
 ```
 
 ### Windows (via PowerShell)

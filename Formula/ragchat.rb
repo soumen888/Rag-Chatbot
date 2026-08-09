@@ -5,6 +5,7 @@ class Ragchat < Formula
   version "3.0.0"
 
   depends_on "python@3.11"
+  depends_on "rust" => :build
 
   # Prevents Homebrew from trying to relocate Python native extensions
   # (e.g. orjson) inside the venv, which fails due to Mach-O header size limits
@@ -33,6 +34,6 @@ class Ragchat < Formula
 
   test do
     # Simple check to see if the command responds
-    assert_match "MAIN MENU", shell_output("#{bin}/ragchat --help", 1)
+    assert_match "Universal Documentation Chat", shell_output("#{bin}/ragchat", 1)
   end
 end

@@ -48,10 +48,9 @@ jobs:
         run: brew tap soumen888/ragchat file://${{ github.workspace }}
 
       - name: Install Rag-Chatbot via Homebrew
-        run: |
-          brew install Formula/ragchat.rb
+        run: brew install soumen888/ragchat/ragchat
 
       - name: Verify Installation
         run: |
           which ragchat
-          ragchat --help || true
+          ragchat --help
