@@ -35,3 +35,19 @@ jobs:
         run: |
           python -m py_compile main.py website/__init__.py website/crawler.py telegram/__init__.py telegram/ingestor.py core/__init__.py core/chunker.py core/vector_db.py core/chatbot.py
           python -c "import website, telegram, core; print('All modules imported successfully!')"
+
+  test-brew-install:
+    name: Test Homebrew Installation
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rag-Chatbot via Homebrew
+        run: |
+          brew install Formula/ragchat.rb
+
+      - name: Verify Installation
+        run: |
+          which ragchat
+          ragchat --help || true
