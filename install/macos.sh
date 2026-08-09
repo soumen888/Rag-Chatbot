@@ -58,9 +58,7 @@ python3 -m playwright install chromium > /dev/null 2>&1 || true
 mkdir -p "$BIN_DIR"
 LAUNCHER="$BIN_DIR/ragchat"
 
-LAUNCHER="$INSTALL_BIN/ragchat"
-
-cat << 'EOF' > "$LAUNCHER" 2>/dev/null || sudo cat << 'EOF' > "$LAUNCHER"
+cat << 'EOF' > "$LAUNCHER"
 #!/usr/bin/env bash
 INSTALL_DIR="$HOME/.ragchat"
 if [ -d "$INSTALL_DIR" ]; then
