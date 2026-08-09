@@ -12,6 +12,7 @@ dist/
 
 # Local databases and caches
 chroma_db/
+ragchat_db/
 .crawl_cache/
 test_chroma/
 
