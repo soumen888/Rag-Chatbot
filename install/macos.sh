@@ -62,7 +62,7 @@ pip install -r requirements.txt --quiet
 
 # Playwright Browsers setup
 echo "[*] Setting up web crawler headless browser..."
-python3 -m playwright install chromium --quiet || true
+python3 -m playwright install chromium > /dev/null 2>&1 || true
 
 # Create executable launcher script
 mkdir -p "$BIN_DIR"
@@ -82,6 +82,25 @@ EOF
 
 chmod +x "$LAUNCHER"
 
+# Auto-add BIN_DIR to PATH in shell profile if missing
+if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
+    SHELL_PROFILE=""
+    if [ -n "$ZSH_VERSION" ] || [ -f "$HOME/.zshrc" ]; then
+        SHELL_PROFILE="$HOME/.zshrc"
+    elif [ -f "$HOME/.bashrc" ]; then
+        SHELL_PROFILE="$HOME/.bashrc"
+    fi
+
+    if [ -n "$SHELL_PROFILE" ]; then
+        if ! grep -q "$BIN_DIR" "$SHELL_PROFILE" 2>/dev/null; then
+            echo "" >> "$SHELL_PROFILE"
+            echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> "$SHELL_PROFILE"
+            echo "[*] Added $BIN_DIR to $SHELL_PROFILE"
+        fi
+    fi
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
 echo ""
 echo "=================================================="
 echo "        RAGChat Installed Successfully!           "
@@ -91,9 +110,3 @@ echo "You can now run RAGChat by typing:"
 echo "  ragchat"
 echo ""
 
-# Check if ~/.local/bin is in PATH
-if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
-    echo "Note: Add $BIN_DIR to your PATH if 'ragchat' command is not recognized:"
-    echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
-    echo ""
-fi
