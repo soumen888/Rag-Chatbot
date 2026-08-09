@@ -1,5 +1,6 @@
 # Core dependencies (always required)
 chromadb
+orjson>=3.9.0
 sentence-transformers
 beautifulsoup4
 requests

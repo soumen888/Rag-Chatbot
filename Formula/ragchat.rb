@@ -6,6 +6,10 @@ class Ragchat < Formula
 
   depends_on "python@3.11"
 
+  # Prevents Homebrew from trying to relocate Python native extensions
+  # (e.g. orjson) inside the venv, which fails due to Mach-O header size limits
+  skip_clean "libexec"
+
   def install
     # Copy all source files to the Homebrew execution directory
     libexec.install Dir["*"]
@@ -15,7 +19,7 @@ class Ragchat < Formula
 
     # Install Python requirements
     system "#{libexec}/venv/bin/pip", "install", "--upgrade", "pip"
-    system "#{libexec}/venv/bin/pip", "install", "-r", "#{libexec}/requirements.txt"
+    system "#{libexec}/venv/bin/pip", "install", "--prefer-binary", "-r", "#{libexec}/requirements.txt"
 
     # Create a native executable wrapper in the bin directory
     (bin/"ragchat").write <<~EOS
