@@ -8,18 +8,7 @@ playwright
 rich
 telethon
 psutil
-pyinstaller
 
+# Universal LLM Provider Interface (Gemini, OpenAI, Anthropic, Groq, Ollama, etc.)
+litellm
 
-# ─────────────────────────────────────────────────
-# LLM Provider SDKs — install ONLY what you need
-# ─────────────────────────────────────────────────
-
-# Google AI Studio / Gemini / Gemma (default)
-google-genai
-
-# OpenAI, Groq, Together AI, Mistral, LM Studio, or any OpenAI-compatible API
-# pip install openai
-
-# Anthropic (Claude)
-# pip install anthropic

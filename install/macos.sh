@@ -1,44 +1,99 @@
 #!/usr/bin/env bash
-# RAG Chat macOS / Linux Installer Script
+# RAGChat Installer Script for macOS & Linux
+# Installs RAGChat via Git clone or zip download, sets up Python virtualenv, installs dependencies, and creates a global 'ragchat' command.
+
 set -e
 
+REPO_URL="https://github.com/soumen888/Rag-Chatbot.git"
+INSTALL_DIR="$HOME/.ragchat"
+BIN_DIR="$HOME/.local/bin"
+
 echo "=================================================="
-echo "          RAG Chat Installer                      "
+echo "          RAGChat Universal Installer             "
 echo "=================================================="
 
-OS="$(uname -s)"
-case "$OS" in
-    Linux*)     ASSET="ragchat-linux-x64";;
-    Darwin*)    ASSET="ragchat-macos-x64";;
-    *)          echo "[!] Unsupported operating system: $OS"; exit 1;;
-esac
+# Check Python 3 & minimum version (3.9+)
+if ! command -v python3 &> /dev/null; then
+    echo "[!] Python 3 is required but not installed."
+    echo "    Please download and install Python 3.9+ from: https://www.python.org/downloads/"
+    exit 1
+fi
 
-DOWNLOAD_URL="https://github.com/soumen888/homebrew-ragchat/releases/latest/download/${ASSET}"
-INSTALL_DIR="/usr/local/bin"
+PYTHON_MAJOR=$(python3 -c 'import sys; print(sys.version_info.major)')
+PYTHON_MINOR=$(python3 -c 'import sys; print(sys.version_info.minor)')
 
-# Fallback to ~/.ragchat/bin if /usr/local/bin is not writable
-if [ ! -w "$INSTALL_DIR" ]; then
-    INSTALL_DIR="$HOME/.ragchat/bin"
-    mkdir -p "$INSTALL_DIR"
-    
-    # Add to PATH in shell profile if needed
-    if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
-        SHELL_PROFILE="$HOME/.bashrc"
-        if [ -n "$ZSH_VERSION" ] || [ -f "$HOME/.zshrc" ]; then
-            SHELL_PROFILE="$HOME/.zshrc"
-        fi
-        echo "export PATH=\"\$PATH:$INSTALL_DIR\"" >> "$SHELL_PROFILE"
-        echo "[*] Added $INSTALL_DIR to $SHELL_PROFILE"
+if [ "$PYTHON_MAJOR" -lt 3 ] || [ "$PYTHON_MINOR" -lt 9 ]; then
+    echo "[!] Outdated Python version detected: $PYTHON_MAJOR.$PYTHON_MINOR"
+    echo "    RAGChat requires Python 3.9 or higher."
+    echo "    Please upgrade Python from official site: https://www.python.org/downloads/"
+    exit 1
+fi
+
+echo "[+] Detected Python $PYTHON_MAJOR.$PYTHON_MINOR (Compatible)"
+
+# Clone or Update Repository
+if [ -d "$INSTALL_DIR" ]; then
+    echo "[*] Updating existing RAGChat installation in $INSTALL_DIR..."
+    cd "$INSTALL_DIR"
+    if [ -d ".git" ]; then
+        git pull --quiet
+    fi
+else
+    echo "[*] Installing RAGChat to $INSTALL_DIR..."
+    if command -v git &> /dev/null; then
+        git clone --quiet "$REPO_URL" "$INSTALL_DIR"
+    else
+        mkdir -p "$INSTALL_DIR"
+        curl -fsSL https://github.com/soumen888/Rag-Chatbot/archive/refs/heads/main.tar.gz | tar -xz -C "$INSTALL_DIR" --strip-components=1
     fi
 fi
 
-TARGET="$INSTALL_DIR/ragchat"
+cd "$INSTALL_DIR"
 
-echo "[*] Downloading $ASSET..."
-curl -fsSL "$DOWNLOAD_URL" -o "$TARGET"
-chmod +x "$TARGET"
+# Create Virtual Environment
+echo "[*] Setting up Python virtual environment..."
+python3 -m venv venv
+source venv/bin/activate
 
+# Install Dependencies
+echo "[*] Installing required dependencies (LiteLLM, ChromaDB, etc.)..."
+pip install --upgrade pip --quiet
+pip install -r requirements.txt --quiet
+
+# Playwright Browsers setup
+echo "[*] Setting up web crawler headless browser..."
+python3 -m playwright install chromium --quiet || true
+
+# Create executable launcher script
+mkdir -p "$BIN_DIR"
+LAUNCHER="$BIN_DIR/ragchat"
+
+cat << 'EOF' > "$LAUNCHER"
+#!/usr/bin/env bash
+INSTALL_DIR="$HOME/.ragchat"
+if [ -d "$INSTALL_DIR" ]; then
+    source "$INSTALL_DIR/venv/bin/activate"
+    python3 "$INSTALL_DIR/main.py" "$@"
+else
+    echo "[!] RAGChat installation not found at $INSTALL_DIR"
+    exit 1
+fi
+EOF
+
+chmod +x "$LAUNCHER"
+
+echo ""
 echo "=================================================="
-echo "[+] RAG Chat installed successfully to $TARGET!"
-echo "[+] Type 'ragchat' in your terminal to start."
+echo "        RAGChat Installed Successfully!           "
 echo "=================================================="
+echo ""
+echo "You can now run RAGChat by typing:"
+echo "  ragchat"
+echo ""
+
+# Check if ~/.local/bin is in PATH
+if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
+    echo "Note: Add $BIN_DIR to your PATH if 'ragchat' command is not recognized:"
+    echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+    echo ""
+fi

@@ -5,13 +5,13 @@ import re
 import hashlib
 
 class VectorDB:
-    def __init__(self, db_path="./chroma_db"):
+    def __init__(self, db_path="./ragchat_db"):
         self.db_path = db_path
         self.client = chromadb.PersistentClient(path=self.db_path)
         
-        # Use ONNX version of all-MiniLM-L6-v2 (fast & lightweight, no PyTorch needed)
-        print("[*] Loading ONNX embedding model (all-MiniLM-L6-v2)...")
-        self.embedding_function = embedding_functions.ONNXMiniLM_L6_V2EmbeddingFunction()
+        # Use default lightweight embedding model (all-MiniLM-L6-v2)
+        print("[*] Loading embedding model (all-MiniLM-L6-v2)...")
+        self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
 
     def sanitize_collection_name(self, name):
         # ChromaDB collection names must be 3-63 chars, alphanumeric or _ or -
@@ -24,7 +24,7 @@ class VectorDB:
         sanitized = sanitized.strip('_').strip('-')
         # Ensure it has at least 3 chars
         if len(sanitized) < 3:
-            sanitized = "doc_db_" + sanitized
+            sanitized = "ragchat_db_" + sanitized
         return sanitized
 
     def get_or_create_collection(self, collection_name):

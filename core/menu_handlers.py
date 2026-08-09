@@ -60,7 +60,7 @@ def interactive_setup_wizard(cfg):
     print("\n==================================================")
     print("           First-Time Setup Wizard                ")
     print("==================================================")
-    print("To use DocChat, let's configure your LLM provider.")
+    print("To use RAGChat, let's configure your LLM provider.")
     
     print("\nSelect your LLM Provider:")
     providers = list(PROVIDER_INFO.keys())
