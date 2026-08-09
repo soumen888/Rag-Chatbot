@@ -5,7 +5,7 @@ import re
 import hashlib
 
 class VectorDB:
-    def __init__(self, db_path="./chroma_db"):
+    def __init__(self, db_path="./ragchat_db"):
         self.db_path = db_path
         self.client = chromadb.PersistentClient(path=self.db_path)
         
@@ -24,7 +24,7 @@ class VectorDB:
         sanitized = sanitized.strip('_').strip('-')
         # Ensure it has at least 3 chars
         if len(sanitized) < 3:
-            sanitized = "doc_db_" + sanitized
+            sanitized = "ragchat_db_" + sanitized
         return sanitized
 
     def get_or_create_collection(self, collection_name):

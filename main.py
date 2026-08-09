@@ -41,7 +41,7 @@ def print_system_stats():
         total_mem = psutil.virtual_memory().total / (1024 * 1024 * 1024) # GB
         mem_percent = psutil.virtual_memory().percent
         cpu_percent = process.cpu_percent(interval=None)
-        db_size = get_dir_size("./chroma_db") / (1024 * 1024) # MB
+        db_size = get_dir_size("./ragchat_db") / (1024 * 1024) # MB
         
         return (
             f"RAM: {process_mem:.1f} MB (System: {total_mem:.1f} GB, {mem_percent}%) | "

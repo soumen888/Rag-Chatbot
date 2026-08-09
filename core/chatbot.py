@@ -45,113 +45,64 @@ class BaseLLMProvider(ABC):
 
 
 # ──────────────────────────────────────────────────────────────
-# Google AI Studio / Vertex AI Provider
+# Universal LiteLLM Provider
 # ──────────────────────────────────────────────────────────────
 
-class GoogleProvider(BaseLLMProvider):
-    """Provider for Google AI Studio and Vertex AI using the google-genai SDK."""
-
-    def __init__(self, api_key: str, model: str = "gemma-4-31b-it"):
-        from google import genai
-        from google.genai import types as genai_types
-        self._genai = genai
-        self._types = genai_types
-        self.model = model
-        self.client = genai.Client(api_key=api_key)
-
-    def generate_answer(self, question: str, context_chunks: list) -> str:
-        system_instruction, user_prompt = self._build_prompt(question, context_chunks)
-        full_prompt = f"{system_instruction}\n\n{user_prompt}"
-        try:
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=full_prompt,
-                config=self._types.GenerateContentConfig(
-                    max_output_tokens=2048,
-                    temperature=0.3
-                )
-            )
-            return response.text
-        except Exception as e:
-            return f"Error communicating with Google GenAI API: {e}"
-
-
-# ──────────────────────────────────────────────────────────────
-# OpenAI-Compatible Provider
-# Covers: OpenAI, Groq, Together AI, Mistral, LM Studio, Perplexity, etc.
-# ──────────────────────────────────────────────────────────────
-
-class OpenAICompatibleProvider(BaseLLMProvider):
+class LiteLLMProvider(BaseLLMProvider):
     """
-    Universal provider for any OpenAI-compatible API.
-    Works with: OpenAI, Groq, Together AI, Mistral, Perplexity,
-    LM Studio, and any service exposing a /v1/chat/completions endpoint.
+    Universal LLM provider powered by LiteLLM.
+    Supports Gemini, OpenAI, Anthropic (Claude), Groq, Together AI, Mistral, Ollama, LM Studio, etc.
     """
 
-    def __init__(self, api_key: str, model: str, base_url: str = None):
-        from openai import OpenAI
-        kwargs = {"api_key": api_key}
-        if base_url:
-            kwargs["base_url"] = base_url
-        self.client = OpenAI(**kwargs)
-        self.model = model
+    def __init__(self, provider_type: str, api_key: str = "", model: str = "", base_url: str = None):
+        import litellm
+        self.litellm = litellm
+        self.provider_type = provider_type
+        self.api_key = api_key
+        self.base_url = base_url
+
+        # Format model name for LiteLLM schema
+        if provider_type == "google":
+            os.environ["GEMINI_API_KEY"] = api_key
+            self.model_name = f"gemini/{model}" if not model.startswith("gemini/") else model
+        elif provider_type == "anthropic":
+            os.environ["ANTHROPIC_API_KEY"] = api_key
+            self.model_name = f"anthropic/{model}" if not model.startswith("anthropic/") else model
+        elif provider_type == "openai":
+            os.environ["OPENAI_API_KEY"] = api_key
+            self.model_name = model
+        elif provider_type == "groq":
+            os.environ["GROQ_API_KEY"] = api_key
+            self.model_name = f"groq/{model}" if not model.startswith("groq/") else model
+        elif provider_type == "mistral":
+            os.environ["MISTRAL_API_KEY"] = api_key
+            self.model_name = f"mistral/{model}" if not model.startswith("mistral/") else model
+        elif provider_type in ["ollama", "lmstudio"]:
+            self.model_name = f"ollama/{model}" if not model.startswith("ollama/") else model
+        else:
+            self.model_name = model
 
     def generate_answer(self, question: str, context_chunks: list) -> str:
         system_instruction, user_prompt = self._build_prompt(question, context_chunks)
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
+            kwargs = {
+                "model": self.model_name,
+                "messages": [
                     {"role": "system", "content": system_instruction},
                     {"role": "user", "content": user_prompt}
                 ],
-                max_tokens=2048,
-                temperature=0.3
-            )
+                "max_tokens": 2048,
+                "temperature": 0.3
+            }
+            if self.api_key:
+                kwargs["api_key"] = self.api_key
+            if self.base_url:
+                kwargs["api_base"] = self.base_url
+
+            response = self.litellm.completion(**kwargs)
             return response.choices[0].message.content
         except Exception as e:
-            return f"Error communicating with OpenAI-compatible API: {e}"
-
-
-# ──────────────────────────────────────────────────────────────
-# Ollama Local Provider
-# ──────────────────────────────────────────────────────────────
-
-class OllamaProvider(OpenAICompatibleProvider):
-    """
-    Provider for local Ollama models.
-    Ollama exposes an OpenAI-compatible API at http://localhost:11434/v1
-    Run models locally: ollama pull llama3, ollama pull mistral, etc.
-    """
-
-    def __init__(self, model: str = "llama3", base_url: str = "http://localhost:11434/v1"):
-        super().__init__(api_key="ollama", model=model, base_url=base_url)
-
-
-# ──────────────────────────────────────────────────────────────
-# Anthropic Provider (Claude)
-# ──────────────────────────────────────────────────────────────
-
-class AnthropicProvider(BaseLLMProvider):
-    """Provider for Anthropic Claude models."""
-
-    def __init__(self, api_key: str, model: str = "claude-3-5-sonnet-20241022"):
-        import anthropic
-        self.client = anthropic.Anthropic(api_key=api_key)
-        self.model = model
-
-    def generate_answer(self, question: str, context_chunks: list) -> str:
-        system_instruction, user_prompt = self._build_prompt(question, context_chunks)
-        try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=2048,
-                system=system_instruction,
-                messages=[{"role": "user", "content": user_prompt}]
-            )
-            return response.content[0].text
-        except Exception as e:
-            return f"Error communicating with Anthropic API: {e}"
+            return f"Error communicating with LLM Provider ({self.provider_type}): {e}"
 
 
 # ──────────────────────────────────────────────────────────────
@@ -162,7 +113,7 @@ PROVIDER_INFO = {
     "google": {
         "name": "Google AI Studio (Gemini / Gemma)",
         "key_env": "LLM_API_KEY",
-        "model_default": "gemma-4-31b-it",
+        "model_default": "gemini-1.5-flash",
         "url_required": False,
     },
     "openai": {
@@ -176,28 +127,25 @@ PROVIDER_INFO = {
         "key_env": "LLM_API_KEY",
         "model_default": "llama-3.3-70b-versatile",
         "url_required": False,
-        "base_url": "https://api.groq.com/openai/v1",
     },
     "together": {
         "name": "Together AI",
         "key_env": "LLM_API_KEY",
-        "model_default": "meta-llama/Llama-3-8b-chat-hf",
+        "model_default": "together_ai/meta-llama/Llama-3-8b-chat-hf",
         "url_required": False,
-        "base_url": "https://api.together.xyz/v1",
     },
     "mistral": {
         "name": "Mistral AI",
         "key_env": "LLM_API_KEY",
         "model_default": "mistral-small-latest",
         "url_required": False,
-        "base_url": "https://api.mistral.ai/v1",
     },
     "ollama": {
         "name": "Ollama (Local)",
         "key_env": None,
         "model_default": "llama3",
         "url_required": False,
-        "base_url": "http://localhost:11434/v1",
+        "base_url": "http://localhost:11434",
     },
     "lmstudio": {
         "name": "LM Studio (Local)",
@@ -224,7 +172,7 @@ PROVIDER_INFO = {
 def get_provider() -> BaseLLMProvider:
     """
     Factory function. Reads LLM_PROVIDER, LLM_API_KEY, LLM_MODEL, LLM_BASE_URL
-    from environment variables and returns the correct provider instance.
+    from environment variables and returns the LiteLLMProvider instance.
     """
     provider_name = os.environ.get("LLM_PROVIDER", "google").lower().strip()
     api_key = os.environ.get("LLM_API_KEY", "")
@@ -238,42 +186,28 @@ def get_provider() -> BaseLLMProvider:
             f"Valid options: {', '.join(PROVIDER_INFO.keys())}"
         )
 
-    # Use default model if none specified
     if not model:
         model = info["model_default"]
 
-    # Resolve base URL (env overrides hardcoded default)
     if not base_url:
         base_url = info.get("base_url")
 
-    if provider_name == "google":
-        if not api_key:
-            raise ValueError("LLM_API_KEY is required for the Google provider.")
-        return GoogleProvider(api_key=api_key, model=model)
+    if info["key_env"] and not api_key and provider_name not in ["ollama", "lmstudio"]:
+        raise ValueError(f"LLM_API_KEY is required for the '{provider_name}' provider.")
 
-    elif provider_name == "anthropic":
-        if not api_key:
-            raise ValueError("LLM_API_KEY is required for the Anthropic provider.")
-        return AnthropicProvider(api_key=api_key, model=model)
-
-    elif provider_name == "ollama":
-        return OllamaProvider(model=model, base_url=base_url)
-
-    elif provider_name == "lmstudio":
-        return OllamaProvider(model=model, base_url=base_url)
-
-    else:
-        # openai, groq, together, mistral, custom
-        if not api_key and provider_name not in ["ollama", "lmstudio"]:
-            raise ValueError(f"LLM_API_KEY is required for the '{provider_name}' provider.")
-        return OpenAICompatibleProvider(api_key=api_key, model=model, base_url=base_url)
+    return LiteLLMProvider(
+        provider_type=provider_name,
+        api_key=api_key,
+        model=model,
+        base_url=base_url
+    )
 
 
 # ──────────────────────────────────────────────────────────────
 # Legacy compatibility shim
 # ──────────────────────────────────────────────────────────────
 
-class DocChatbot:
+class RAGChatbot:
     """Compatibility wrapper. Use get_provider() directly in new code."""
 
     def __init__(self, api_key=None, model_name=None):

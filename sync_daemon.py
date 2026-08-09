@@ -13,7 +13,7 @@ from core import DocChunker, VectorDB, ConfigManager
 
 def run_daemon():
     print("==================================================")
-    print("     DocChat Background Sync Daemon (TG & DS)     ")
+    print("     RAGChat Background Sync Daemon (TG & DS)     ")
     print("==================================================")
 
     auto_sync = os.environ.get("TG_AUTO_SYNC_ENABLED", "true").lower().strip() == "true"
