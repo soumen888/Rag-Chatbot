@@ -9,7 +9,7 @@ class DriveClient:
     def list_drive_files(self, max_results=20, query=None):
         """Lists files on Google Drive matching a query."""
         results = self.service.files().list(
-            maxResults=max_results, q=query,
+            pageSize=max_results, q=query,
             fields="nextPageToken, files(id, name, mimeType)"
         ).execute()
         return results.get('files', [])
