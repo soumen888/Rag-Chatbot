@@ -4,12 +4,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 
-# Scopes needed for Gmail, Calendar, Tasks, and Drive (Docs, Sheets, Slides)
+# Scopes needed for Gmail, Calendar, Tasks, Drive, Sheets, Docs, and Meet
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.modify",       # Read/Write/Delete Mail
-    "https://www.googleapis.com/auth/calendar",           # Read/Write Calendar
+    "https://www.googleapis.com/auth/calendar",           # Read/Write Calendar (including Meet generation)
     "https://www.googleapis.com/auth/tasks",              # Read/Write Tasks
-    "https://www.googleapis.com/auth/drive"               # Full access to Drive/Docs
+    "https://www.googleapis.com/auth/drive",              # Full access to Drive/Docs
+    "https://www.googleapis.com/auth/spreadsheets",       # Read/Write Sheets
+    "https://www.googleapis.com/auth/documents"           # Read/Write Docs
 ]
 
 class GoogleAuthManager:

@@ -64,7 +64,96 @@ def print_banner():
     console.print(f"[dim]  {stats_str}  [/dim]")
     console.print("[bold cyan]========================================================================[/bold cyan]")
 
+def parse_time_window(window_str):
+    """Parses time window strings like '10h', '2d', '1w', '1m' to epoch offset."""
+    import re
+    import time
+    match = re.match(r"^(\d+)([hdwmy])$", window_str.lower().strip())
+    if not match:
+        return None
+    value = int(match.group(1))
+    unit = match.group(2)
+    
+    seconds = 0
+    if unit == 'h':
+        seconds = value * 3600
+    elif unit == 'd':
+        seconds = value * 86400
+    elif unit == 'w':
+        seconds = value * 86400 * 7
+    elif unit == 'm':
+        seconds = value * 86400 * 30
+    elif unit == 'y':
+        seconds = value * 86400 * 365
+        
+    return int(time.time() - seconds)
+
+def handle_cli_commands():
+    """Handles structured non-interactive CLI commands (e.g., ragchat -g dev 10h)."""
+    import sys
+    import time
+    from core.sync import GoogleSyncEngine
+    from core.db import LocalDB
+    from rich.table import Table
+    
+    args = sys.argv[1:]
+    if not args:
+        return False
+        
+    # Example: -g dev 10h
+    if args[0] == '-g':
+        if len(args) < 3:
+            print("[!] Usage: python main.py -g <profile_name> <time_window> (e.g., -g dev 10h)")
+            sys.exit(1)
+            
+        profile_name = args[1]
+        time_window_str = args[2]
+        
+        since_timestamp = parse_time_window(time_window_str)
+        if since_timestamp is None:
+            print(f"[!] Invalid time window format: '{time_window_str}'. Use format like '10h', '2d', '1w'.")
+            sys.exit(1)
+            
+        # 1. Sync recent emails first
+        sync_engine = GoogleSyncEngine()
+        print(f"[*] Syncing recent emails for '{profile_name}'...")
+        sync_engine.sync_gmail(profile_name)
+        
+        # 2. Query local SQLite
+        db_conn = LocalDB()
+        emails = db_conn.get_emails(profile_name, since_timestamp=since_timestamp, limit=100)
+        
+        if not emails:
+            print(f"[-] No emails found for profile '{profile_name}' in the last {time_window_str}.")
+            sys.exit(0)
+            
+        # 3. Print formatted table using Rich
+        console = Console()
+        table = Table(title=f"Emails for '{profile_name}' (Last {time_window_str})", show_lines=True)
+        table.add_column("Date", style="cyan", no_wrap=True)
+        table.add_column("From", style="green")
+        table.add_column("Subject", style="magenta")
+        table.add_column("Snippet", style="white")
+        
+        for email_data in emails:
+            # Shorten date for readable formatting
+            dt_str = email_data['date']
+            if len(dt_str) > 16:
+                dt_str = dt_str[:16].replace('T', ' ')
+            
+            from_str = f"{email_data['sender_name']} <{email_data['sender']}>" if email_data['sender_name'] else email_data['sender']
+            table.add_row(dt_str, from_str, email_data['subject'], email_data['snippet'])
+            
+        console.print(table)
+        sys.exit(0)
+        
+    return False
+
 def main():
+    # Handle direct CLI flags first
+    if handle_cli_commands():
+        return
+        
     print_banner()
     cfg = ConfigManager()
     
