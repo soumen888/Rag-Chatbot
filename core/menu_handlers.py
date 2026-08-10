@@ -12,6 +12,8 @@ from discord import DiscordIngestor
 from core.chunker import DocChunker
 from core.chatbot import get_provider, PROVIDER_INFO
 from core.config_manager import ConfigManager
+from Google.auth import GoogleAuthManager
+from microsoft.auth import MicrosoftAuthManager
 
 def format_col_display(col_name):
     """Formats a ChromaDB collection name for display in menus."""
@@ -567,17 +569,22 @@ def handle_collections_menu(db):
                         pass
 
 def handle_settings_menu(cfg):
+    g_manager = GoogleAuthManager()
+    ms_manager = MicrosoftAuthManager()
+    
     while True:
         print("\n--- SETTINGS & ACCOUNT CONNECTIONS ---")
         print("1. Add / Link a Telegram account")
         print("2. Add / Link a Discord account")
-        print("3. List connected accounts")
-        print("4. Remove a connected account")
-        print("5. Change LLM Provider or API Key")
-        print("6. Back to main menu")
+        print("3. Add / Link a Google account")
+        print("4. Add / Link a Microsoft account")
+        print("5. List connected accounts")
+        print("6. Remove a connected account")
+        print("7. Change LLM Provider or API Key")
+        print("8. Back to main menu")
 
-        sub = input("\nSelect option (1-6): ").strip()
-        if sub == "6" or sub.lower() in ["back", "b"]:
+        sub = input("\nSelect option (1-8): ").strip()
+        if sub == "8" or sub.lower() in ["back", "b"]:
             break
 
         if sub == "1":
@@ -622,8 +629,33 @@ def handle_settings_menu(cfg):
                     print(f"[+] Discord user profile '{profile_name}' added!")
 
         elif sub == "3":
+            profile_name = input("Enter a label for this Google profile (e.g. personal, work): ").strip()
+            if not profile_name:
+                print("[!] Profile name is required.")
+                continue
+            try:
+                g_manager.authenticate_profile(profile_name)
+                print(f"[+] Google profile '{profile_name}' successfully linked!")
+            except Exception as e:
+                print(f"[!] Google authorization failed: {e}")
+
+        elif sub == "4":
+            profile_name = input("Enter a label for this Microsoft profile (e.g. personal, work): ").strip()
+            if not profile_name:
+                print("[!] Profile name is required.")
+                continue
+            try:
+                ms_manager.authenticate_profile(profile_name)
+                print(f"[+] Microsoft profile '{profile_name}' successfully linked!")
+            except Exception as e:
+                print(f"[!] Microsoft authorization failed: {e}")
+
+        elif sub == "5":
             tg = cfg.load_tg_profiles()
             ds = cfg.load_ds_profiles()
+            google_accs = g_manager.list_profiles()
+            ms_accs = ms_manager.list_profiles()
+            
             print("\nConnected Telegram Accounts:")
             if not tg:
                 print("  - None")
@@ -636,11 +668,25 @@ def handle_settings_menu(cfg):
             for name in ds:
                 is_bot = " (Bot)" if ds[name].get("is_bot") else " (User)"
                 print(f"  - {name}{is_bot}")
+                
+            print("\nConnected Google Accounts:")
+            if not google_accs:
+                print("  - None")
+            for name in google_accs:
+                print(f"  - {name}")
 
-        elif sub == "4":
+            print("\nConnected Microsoft Accounts:")
+            if not ms_accs:
+                print("  - None")
+            for name in ms_accs:
+                print(f"  - {name}")
+
+        elif sub == "6":
             print("\n1. Remove Telegram Profile")
             print("2. Remove Discord Profile")
-            ch = input("Select (1-2): ").strip()
+            print("3. Remove Google Profile")
+            print("4. Remove Microsoft Profile")
+            ch = input("Select (1-4): ").strip()
             if ch == "1":
                 name = input("Enter profile label to delete: ").strip()
                 if cfg.delete_tg_profile(name):
@@ -653,8 +699,20 @@ def handle_settings_menu(cfg):
                     print(f"[+] Profile '{name}' removed.")
                 else:
                     print("[!] Profile not found.")
+            elif ch == "3":
+                name = input("Enter profile label to delete: ").strip()
+                if g_manager.delete_profile(name):
+                    print(f"[+] Google profile '{name}' removed.")
+                else:
+                    print("[!] Profile not found.")
+            elif ch == "4":
+                name = input("Enter profile label to delete: ").strip()
+                if ms_manager.delete_profile(name):
+                    print(f"[+] Microsoft profile '{name}' removed.")
+                else:
+                    print("[!] Profile not found.")
 
-        elif sub == "5":
+        elif sub == "7":
             interactive_setup_wizard(cfg)
 
 def db_safe_profile_name(name):
