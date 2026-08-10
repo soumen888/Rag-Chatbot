@@ -60,15 +60,15 @@ class GoogleAuthManager:
         cred_data = accounts[profile_name]
         
         # Check if environment keys are present or we have a client_secrets.json
-        client_id = os.environ.get("GOOGLE_CLIENT_ID")
-        client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+        client_id = os.environ.get("GOOGLE_CLIENT_ID") or cred_data.get("client_id") or "98032548465-6aprf7afrl8rk8207ar857mnv8jdf59o.apps.googleusercontent.com"
+        client_secret = os.environ.get("GOOGLE_CLIENT_SECRET") or cred_data.get("client_secret") or "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"
         
         creds = Credentials(
             token=cred_data.get("token"),
             refresh_token=cred_data.get("refresh_token"),
             token_uri="https://oauth2.googleapis.com/token",
-            client_id=client_id or cred_data.get("client_id"),
-            client_secret=client_secret or cred_data.get("client_secret")
+            client_id=client_id,
+            client_secret=client_secret
         )
 
         if creds.expired and creds.refresh_token:
@@ -88,8 +88,17 @@ class GoogleAuthManager:
         Uses environment variables GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET,
         or falls back to reading client_secrets.json in ~/.config/ragchat/client_secrets.json.
         """
-        client_id = os.environ.get("GOOGLE_CLIENT_ID")
-        client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+        client_id = os.environ.get("GOOGLE_CLIENT_ID", "98032548465-6aprf7afrl8rk8207ar857mnv8jdf59o.apps.googleusercontent.com")
+        client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "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")
+
+        # Check for client_secret files in the workspace / project directory
+        workspace_secret = None
+        import glob
+        project_secrets = glob.glob("client_secret_*.json")
+        if project_secrets:
+            workspace_secret = project_secrets[0]
+        elif os.path.exists("client_secrets.json"):
+            workspace_secret = "client_secrets.json"
 
         if client_id and client_secret:
             # Construct client config dynamically
@@ -102,12 +111,15 @@ class GoogleAuthManager:
                 }
             }
             flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
+        elif workspace_secret and os.path.exists(workspace_secret):
+            flow = InstalledAppFlow.from_client_secrets_file(workspace_secret, SCOPES)
         elif os.path.exists(self.client_secrets_path):
             flow = InstalledAppFlow.from_client_secrets_file(self.client_secrets_path, SCOPES)
         else:
             raise FileNotFoundError(
                 f"Missing Google credentials. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET "
-                f"in your .env file, or place a valid client_secrets.json file in '{self.config_dir}'."
+                f"in your .env file, or place a valid client_secrets.json file in '{self.config_dir}' "
+                f"or in your project folder (e.g. client_secret_*.json)."
             )
 
         # Start temporary webserver for OAuth redirect
