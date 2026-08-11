@@ -9,11 +9,14 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 
 from services.telegram import TelegramIngestor
 from services.discord import DiscordIngestor
+from services.google.auth import GoogleAuthManager
+from services.microsoft.auth import MicrosoftAuthManager
+from core.sync import GoogleSyncEngine, MicrosoftSyncEngine
 from core import DocChunker, VectorDB, ConfigManager
 
 def run_daemon():
     print("==================================================")
-    print("     RAGChat Background Sync Daemon (TG & DS)     ")
+    print("  RAGChat Background Sync Daemon (Mail & Chat)  ")
     print("==================================================")
 
     auto_sync = os.environ.get("TG_AUTO_SYNC_ENABLED", "true").lower().strip() == "true"
@@ -69,6 +72,34 @@ def run_daemon():
                     print(f"  [!] Sync error on Discord profile '{profile_name}': {e}")
         else:
             print("[*] No Discord profiles or target channels configured. Skipping.")
+
+        # 3. Sync Gmail Emails across all Google profiles
+        g_manager = GoogleAuthManager()
+        google_profiles = g_manager.list_profiles()
+        if google_profiles:
+            print(f"[*] Syncing Gmail ({len(google_profiles)} profiles)...")
+            g_sync = GoogleSyncEngine()
+            for profile_name in google_profiles:
+                try:
+                    g_sync.sync_gmail(profile_name)
+                except Exception as e:
+                    print(f"  [!] Sync error on Gmail profile '{profile_name}': {e}")
+        else:
+            print("[*] No Google profiles linked. Skipping.")
+
+        # 4. Sync Outlook Emails across all Microsoft profiles
+        ms_manager = MicrosoftAuthManager()
+        microsoft_profiles = ms_manager.list_profiles()
+        if microsoft_profiles:
+            print(f"[*] Syncing Outlook ({len(microsoft_profiles)} profiles)...")
+            ms_sync = MicrosoftSyncEngine()
+            for profile_name in microsoft_profiles:
+                try:
+                    ms_sync.sync_outlook(profile_name)
+                except Exception as e:
+                    print(f"  [!] Sync error on Outlook profile '{profile_name}': {e}")
+        else:
+            print("[*] No Microsoft profiles linked. Skipping.")
 
         print(f"\n[*] Sync cycle finished. Sleeping for {interval_minutes} minutes until next run...")
         time.sleep(interval_seconds)
