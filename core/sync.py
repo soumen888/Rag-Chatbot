@@ -121,3 +121,104 @@ class GoogleSyncEngine:
         self.local_db.update_last_sync(profile_name, 'gmail', int(time.time()))
         print(f"[+] Successfully synced {synced_count} emails for profile '{profile_name}'.")
         return synced_count
+
+
+class MicrosoftSyncEngine:
+    def __init__(self, db_path=None):
+        from microsoft.auth import MicrosoftAuthManager
+        self.auth_manager = MicrosoftAuthManager()
+        self.local_db = LocalDB(db_path)
+
+    def parse_outlook_email(self, msg_detail):
+        """Parses Microsoft Graph message details into a database-compatible dictionary."""
+        sender_obj = msg_detail.get('from', {}).get('emailAddress', {})
+        sender_email = sender_obj.get('address', '')
+        sender_name = sender_obj.get('name', '')
+
+        # Extract primary recipient
+        recipients_list = msg_detail.get('toRecipients', [])
+        recipient = ""
+        if recipients_list:
+            recipient = recipients_list[0].get('emailAddress', {}).get('address', '')
+
+        subject = msg_detail.get('subject', '(No Subject)')
+        date_str = msg_detail.get('receivedDateTime', '')
+        
+        # Parse ISO date and epoch timestamp
+        timestamp = int(time.time())
+        iso_date = datetime.now(timezone.utc).isoformat()
+        if date_str:
+            try:
+                # Graph datetime looks like '2026-08-11T17:42:13Z'
+                # Remove Z and parse
+                clean_date = date_str.replace('Z', '+00:00')
+                dt = datetime.fromisoformat(clean_date)
+                timestamp = int(dt.timestamp())
+                iso_date = dt.isoformat()
+            except Exception:
+                pass
+
+        snippet = msg_detail.get('inferenceClassification', '') or msg_detail.get('bodyPreview', '')
+        body = msg_detail.get('body', {}).get('content', '')
+        # Simple HTML tag stripper if body content is HTML
+        if msg_detail.get('body', {}).get('contentType') == 'html':
+            import re
+            # Basic text-conversion of HTML to plain text
+            body = re.sub('<[^<]+?>', '', body)
+            
+        if not body:
+            body = snippet
+
+        return {
+            'id': msg_detail['id'],
+            'sender': sender_email,
+            'sender_name': sender_name,
+            'recipient': recipient,
+            'subject': subject,
+            'date': iso_date,
+            'timestamp': timestamp,
+            'snippet': snippet[:200] if snippet else "",
+            'body': body
+        }
+
+    def sync_outlook(self, profile_name, limit=50):
+        """Fetches recent emails from Outlook via Microsoft Graph and saves them."""
+        print(f"[*] Starting Outlook sync for profile: '{profile_name}'...")
+        from microsoft.client import MicrosoftClient
+        try:
+            token = self.auth_manager.get_token(profile_name)
+            client = MicrosoftClient(token)
+        except Exception as e:
+            print(f"[!] Authentication error for profile '{profile_name}': {e}")
+            return 0
+
+        # Sync from Outlook
+        try:
+            # Graph list_emails returns top-N emails
+            messages_list = client.outlook.list_emails(max_results=limit)
+        except Exception as e:
+            print(f"[!] Failed to list messages from Outlook: {e}")
+            return 0
+
+        if not messages_list:
+            print(f"[+] Outlook for profile '{profile_name}' is already up-to-date.")
+            self.local_db.update_last_sync(profile_name, 'outlook', int(time.time()))
+            return 0
+
+        parsed_emails = []
+        synced_count = 0
+        for msg_detail in messages_list:
+            try:
+                email_data = self.parse_outlook_email(msg_detail)
+                email_data['profile_name'] = profile_name
+                parsed_emails.append(email_data)
+                synced_count += 1
+            except Exception as e:
+                print(f"[!] Failed to parse Outlook email: {e}")
+
+        if parsed_emails:
+            self.local_db.save_microsoft_emails(parsed_emails)
+            
+        self.local_db.update_last_sync(profile_name, 'outlook', int(time.time()))
+        print(f"[+] Successfully synced {synced_count} Outlook emails for profile '{profile_name}'.")
+        return synced_count

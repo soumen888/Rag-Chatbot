@@ -19,7 +19,7 @@ class LocalDB:
 
     def _init_db(self):
         with self._get_connection() as conn:
-            # Table for storing raw emails
+            # Table for storing raw Google emails
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS google_emails (
                     id TEXT PRIMARY KEY,
@@ -28,8 +28,8 @@ class LocalDB:
                     sender_name TEXT,
                     recipient TEXT,
                     subject TEXT,
-                    date TEXT, -- ISO 8601 string
-                    timestamp INTEGER, -- Epoch timestamp for fast sorting/filtering
+                    date TEXT,
+                    timestamp INTEGER,
                     snippet TEXT,
                     body TEXT
                 )
@@ -37,11 +37,28 @@ class LocalDB:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_emails_profile_time ON google_emails(profile_name, timestamp)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_emails_sender ON google_emails(sender)")
 
+            # Table for storing raw Microsoft emails
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS microsoft_emails (
+                    id TEXT PRIMARY KEY,
+                    profile_name TEXT,
+                    sender TEXT,
+                    sender_name TEXT,
+                    recipient TEXT,
+                    subject TEXT,
+                    date TEXT,
+                    timestamp INTEGER,
+                    snippet TEXT,
+                    body TEXT
+                )
+            """)
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_ms_emails_profile_time ON microsoft_emails(profile_name, timestamp)")
+
             # Table for tracking last sync timestamp per profile/service
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS sync_history (
                     profile_name TEXT,
-                    service_type TEXT, -- 'gmail', 'drive', etc.
+                    service_type TEXT, -- 'gmail', 'outlook', etc.
                     last_sync_timestamp INTEGER,
                     PRIMARY KEY (profile_name, service_type)
                 )
@@ -61,8 +78,35 @@ class LocalDB:
             """, emails)
             conn.commit()
 
+    def save_microsoft_emails(self, emails):
+        """
+        emails: list of dicts with keys matching microsoft_emails table columns.
+        """
+        with self._get_connection() as conn:
+            conn.executemany("""
+                INSERT OR REPLACE INTO microsoft_emails 
+                (id, profile_name, sender, sender_name, recipient, subject, date, timestamp, snippet, body)
+                VALUES (:id, :profile_name, :sender, :sender_name, :recipient, :subject, :date, :timestamp, :snippet, :body)
+            """, emails)
+            conn.commit()
+
     def get_emails(self, profile_name, since_timestamp=None, limit=50):
         query = "SELECT * FROM google_emails WHERE profile_name = ?"
+        params = [profile_name]
+        
+        if since_timestamp is not None:
+            query += " AND timestamp >= ?"
+            params.append(since_timestamp)
+            
+        query += " ORDER BY timestamp DESC LIMIT ?"
+        params.append(limit)
+        
+        with self._get_connection() as conn:
+            rows = conn.execute(query, params).fetchall()
+            return [dict(row) for row in rows]
+
+    def get_microsoft_emails(self, profile_name, since_timestamp=None, limit=50):
+        query = "SELECT * FROM microsoft_emails WHERE profile_name = ?"
         params = [profile_name]
         
         if since_timestamp is not None:

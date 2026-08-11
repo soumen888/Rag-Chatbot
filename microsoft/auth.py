@@ -21,8 +21,8 @@ class MicrosoftAuthManager:
         os.makedirs(self.config_dir, exist_ok=True)
         self.accounts_file = os.path.join(self.config_dir, "microsoft_accounts.json")
         # Standard default client ID for multi-tenant developer apps
-        self.client_id = os.environ.get("MICROSOFT_CLIENT_ID", "common") # Or a default registered client ID
-        self.authority = "https://login.microsoftonline.com/common"
+        self.client_id = os.environ.get("MICROSOFT_CLIENT_ID", "0918f7e0-071e-499f-aec9-383822849070")
+        self.authority = "https://login.microsoftonline.com/consumers"
 
     def _load_accounts(self):
         if os.path.exists(self.accounts_file):
@@ -58,17 +58,16 @@ class MicrosoftAuthManager:
         if profile_name not in accounts:
             raise ValueError(f"Profile '{profile_name}' not found. Please authenticate first.")
 
-        client_id = os.environ.get("MICROSOFT_CLIENT_ID", accounts[profile_name].get("client_id"))
-        if not client_id:
-            raise ValueError("Microsoft Client ID is missing. Set MICROSOFT_CLIENT_ID in your environment.")
+        client_id = os.environ.get("MICROSOFT_CLIENT_ID", accounts[profile_name].get("client_id") or "0918f7e0-071e-499f-aec9-383822849070")
 
-        # Re-build PublicClientApplication
-        app = msal.PublicClientApplication(client_id, authority=self.authority)
-        
-        # Load token cache from serialized state in our accounts file
+        # Create a serializable token cache
+        cache = msal.SerializableTokenCache()
         token_cache_state = accounts[profile_name].get("token_cache")
         if token_cache_state:
-            app.token_cache.deserialize(token_cache_state)
+            cache.deserialize(token_cache_state)
+
+        # Re-build PublicClientApplication with the serializable cache
+        app = msal.PublicClientApplication(client_id, authority=self.authority, token_cache=cache)
 
         # Get accounts from cache
         msal_accounts = app.get_accounts()
@@ -82,8 +81,8 @@ class MicrosoftAuthManager:
             raise Exception("Silent token acquisition failed. User interaction is required.")
 
         # If cache was updated, save it back
-        if app.token_cache.has_state_changed:
-            accounts[profile_name]["token_cache"] = app.token_cache.serialize()
+        if cache.has_state_changed:
+            accounts[profile_name]["token_cache"] = cache.serialize()
             self._save_accounts(accounts)
 
         return result.get("access_token")
@@ -93,13 +92,10 @@ class MicrosoftAuthManager:
         Runs an interactive OAuth flow (opening a browser to localhost redirect).
         If localhost flow fails, it falls back to the Device Code flow.
         """
-        client_id = os.environ.get("MICROSOFT_CLIENT_ID")
-        if not client_id:
-            raise ValueError(
-                "Missing Microsoft Client ID. Please set MICROSOFT_CLIENT_ID in your .env file."
-            )
+        client_id = os.environ.get("MICROSOFT_CLIENT_ID", "0918f7e0-071e-499f-aec9-383822849070")
 
-        app = msal.PublicClientApplication(client_id, authority=self.authority)
+        cache = msal.SerializableTokenCache()
+        app = msal.PublicClientApplication(client_id, authority=self.authority, token_cache=cache)
         result = None
 
         try:
@@ -120,7 +116,7 @@ class MicrosoftAuthManager:
             accounts[profile_name] = {
                 "client_id": client_id,
                 "email": result.get("id_token_claims", {}).get("preferred_username"),
-                "token_cache": app.token_cache.serialize()
+                "token_cache": cache.serialize()
             }
             self._save_accounts(accounts)
             print(f"[+] Microsoft profile '{profile_name}' successfully authenticated!")

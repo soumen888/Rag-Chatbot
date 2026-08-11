@@ -121,7 +121,7 @@ def handle_cli_commands():
     import sys
     import time
     import getpass
-    from core.sync import GoogleSyncEngine
+    from core.sync import GoogleSyncEngine, MicrosoftSyncEngine
     from core.db import LocalDB
     from Google.auth import GoogleAuthManager
     from Google.client import GoogleClient
@@ -339,6 +339,53 @@ def handle_cli_commands():
         # 3. Print formatted table using Rich
         console = Console()
         table = Table(title=f"Emails for '{profile_name}' (Last {time_window_str})", show_lines=True)
+        table.add_column("Date", style="cyan", no_wrap=True)
+        table.add_column("From", style="green")
+        table.add_column("Subject", style="magenta")
+        table.add_column("Snippet", style="white")
+        
+        for email_data in emails:
+            # Shorten date for readable formatting
+            dt_str = email_data['date']
+            if len(dt_str) > 16:
+                dt_str = dt_str[:16].replace('T', ' ')
+            
+            from_str = f"{email_data['sender_name']} <{email_data['sender']}>" if email_data['sender_name'] else email_data['sender']
+            table.add_row(dt_str, from_str, email_data['subject'], email_data['snippet'])
+            
+        console.print(table)
+        sys.exit(0)
+
+    # Example: -m dev 10h (Microsoft Outlook sync and query)
+    if args[0] == '-m':
+        if len(args) < 3:
+            print("[!] Usage: python main.py -m <profile_name> <time_window> (e.g., -m dev 10h)")
+            sys.exit(1)
+            
+        profile_name = args[1]
+        time_window_str = args[2]
+        
+        since_timestamp = parse_time_window(time_window_str)
+        if since_timestamp is None:
+            print(f"[!] Invalid time window format: '{time_window_str}'. Use format like '10h', '2d', '1w'.")
+            sys.exit(1)
+            
+        # 1. Sync recent emails first
+        sync_engine = MicrosoftSyncEngine()
+        print(f"[*] Syncing recent Outlook emails for '{profile_name}'...")
+        sync_engine.sync_outlook(profile_name)
+        
+        # 2. Query local SQLite
+        db_conn = LocalDB()
+        emails = db_conn.get_microsoft_emails(profile_name, since_timestamp=since_timestamp, limit=100)
+        
+        if not emails:
+            print(f"[-] No Outlook emails found for profile '{profile_name}' in the last {time_window_str}.")
+            sys.exit(0)
+            
+        # 3. Print formatted table using Rich
+        console = Console()
+        table = Table(title=f"Outlook Emails for '{profile_name}' (Last {time_window_str})", show_lines=True)
         table.add_column("Date", style="cyan", no_wrap=True)
         table.add_column("From", style="green")
         table.add_column("Subject", style="magenta")
