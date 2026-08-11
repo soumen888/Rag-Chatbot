@@ -3,8 +3,8 @@ import time
 import email
 from email.utils import parsedate_to_datetime
 from datetime import datetime, timezone
-from Google.client import GoogleClient
-from Google.auth import GoogleAuthManager
+from services.google.client import GoogleClient
+from services.google.auth import GoogleAuthManager
 from core.db import LocalDB
 
 class GoogleSyncEngine:
@@ -142,7 +142,7 @@ class GoogleSyncEngine:
 
 class MicrosoftSyncEngine:
     def __init__(self, db_path=None):
-        from microsoft.auth import MicrosoftAuthManager
+        from services.microsoft.auth import MicrosoftAuthManager
         self.auth_manager = MicrosoftAuthManager()
         self.local_db = LocalDB(db_path)
 
@@ -201,7 +201,7 @@ class MicrosoftSyncEngine:
     def sync_outlook(self, profile_name, limit=50, sync_all=False):
         """Fetches recent emails from Outlook via Microsoft Graph and saves them. If sync_all=True, paginates all emails."""
         print(f"[*] Starting Outlook sync for profile: '{profile_name}' (Sync All: {sync_all})...")
-        from microsoft.client import MicrosoftClient
+        from services.microsoft.client import MicrosoftClient
         try:
             token = self.auth_manager.get_token(profile_name)
             client = MicrosoftClient(token)

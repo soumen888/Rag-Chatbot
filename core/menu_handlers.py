@@ -7,13 +7,13 @@ from rich.markdown import Markdown
 from urllib.parse import urlparse
 
 from website import DocCrawler
-from telegram import TelegramIngestor
-from discord import DiscordIngestor
+from services.telegram import TelegramIngestor
+from services.discord import DiscordIngestor
 from core.chunker import DocChunker
 from core.chatbot import get_provider, PROVIDER_INFO
 from core.config_manager import ConfigManager
-from Google.auth import GoogleAuthManager
-from microsoft.auth import MicrosoftAuthManager
+from services.google.auth import GoogleAuthManager
+from services.microsoft.auth import MicrosoftAuthManager
 
 def format_col_display(col_name):
     """Formats a ChromaDB collection name for display in menus."""

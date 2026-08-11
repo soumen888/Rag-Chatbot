@@ -123,10 +123,10 @@ def handle_cli_commands():
     import getpass
     from core.sync import GoogleSyncEngine, MicrosoftSyncEngine
     from core.db import LocalDB
-    from Google.auth import GoogleAuthManager
-    from Google.client import GoogleClient
-    from microsoft.auth import MicrosoftAuthManager
-    from telegram.ingestor import TelegramIngestor
+    from services.google.auth import GoogleAuthManager
+    from services.google.client import GoogleClient
+    from services.microsoft.auth import MicrosoftAuthManager
+    from services.telegram.ingestor import TelegramIngestor
     from core.config_manager import ConfigManager
     from core.menu_handlers import db_safe_profile_name
     from rich.table import Table
