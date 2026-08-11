@@ -21,6 +21,14 @@ class OneDriveClient:
         response.raise_for_status()
         return response.json().get("value", [])
 
+    def search_onedrive_files(self, query, max_results=50):
+        """Search for files recursively across the entire OneDrive."""
+        url = f"{self.base_url}/me/drive/root/search(q='{query}')"
+        params = {"$top": max_results}
+        response = requests.get(url, headers=self.headers, params=params)
+        response.raise_for_status()
+        return response.json().get("value", [])
+
     def download_onedrive_file(self, item_id):
         """Downloads a OneDrive file content as bytes."""
         url = f"{self.base_url}/me/drive/items/{item_id}/content"

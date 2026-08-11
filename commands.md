@@ -28,6 +28,12 @@ Use these commands directly in your terminal to sync, link, and manipulate works
 | `ragchat sheet <profile> <spreadsheet_id> get-tabs` | Lists all sheet tab names inside an existing spreadsheet. | `ragchat sheet dev <id> get-tabs` |
 | `ragchat sheet <profile> <spreadsheet_id> append <range> <values>` | Appends a row of comma-separated values to a sheet range. | `ragchat sheet dev <id> append "Sheet1!A1" "Name,Email"` |
 
+### Google Drive
+| Command Template | Description | Example Usage |
+| :--- | :--- | :--- |
+| `ragchat drive <profile> list` | Lists all files and folders in your Google Drive root directory. | `ragchat drive dev list` |
+| `ragchat drive <profile> list --filter <sheets\|docs\|slides>` | Lists Google files filtered by type. | `ragchat drive dev list --filter docs` <br> `ragchat drive dev list --filter sheets` |
+
 ---
 
 ## 2. Microsoft Account Commands
@@ -44,6 +50,12 @@ Use these commands directly in your terminal to sync, link, and manipulate works
 | `ragchat -m <profile> <time>` | Sync and list Outlook emails within a specific time window. | `ragchat -m work 2d` |
 | `ragchat sync microsoft <profile> all` | Performs a full history pagination sync of all messages in the Outlook inbox. | `ragchat sync microsoft public all` |
 
+### OneDrive
+| Command Template | Description | Example Usage |
+| :--- | :--- | :--- |
+| `ragchat onedrive <profile> list` | Lists all files and folders in your OneDrive root directory. | `ragchat onedrive public list` |
+| `ragchat onedrive <profile> list <folder_path>` | Lists files inside a specific sub-folder path in OneDrive. | `ragchat onedrive public list "Documents/Work"` |
+
 ---
 
 ## 3. Social & Messaging Commands
@@ -52,11 +64,13 @@ Use these commands directly in your terminal to sync, link, and manipulate works
 | Command Template | Description | Example Usage |
 | :--- | :--- | :--- |
 | `ragchat link telegram <profile>` | Link a Telegram account profile. | `ragchat link telegram personal` |
+| `ragchat telegram <profile> sync` | Sync configured Telegram channels into database. | `ragchat telegram personal sync` |
 
 ### Discord
 | Command Template | Description | Example Usage |
 | :--- | :--- | :--- |
 | `ragchat link discord <profile>` | Link a Discord account profile (Bot or User token). | `ragchat link discord work` |
+| `ragchat discord <profile> sync` | Sync configured Discord channel targets into database. | `ragchat discord work sync` |
 
 ---
 
