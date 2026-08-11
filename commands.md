@@ -10,6 +10,7 @@ Use these commands directly in your terminal to sync, link, and manipulate works
 | Command Template | Description | Example Usage |
 | :--- | :--- | :--- |
 | `ragchat link google <profile>` | Authenticate and link a new Google account profile. | `ragchat link google dev` |
+| `ragchat rename-profile google <old_name> <new_name>` | Rename a Google account profile and migrate database records. | `ragchat rename-profile google dev work` |
 
 ### Gmail
 | Command Template | Description | Example Usage |
@@ -34,6 +35,7 @@ Use these commands directly in your terminal to sync, link, and manipulate works
 | Command Template | Description | Example Usage |
 | :--- | :--- | :--- |
 | `ragchat link microsoft <profile>` | Authenticate and link a new Microsoft account profile. | `ragchat link microsoft work` |
+| `ragchat rename-profile microsoft <old_name> <new_name>` | Rename a Microsoft account profile and migrate database records. | `ragchat rename-profile microsoft dev personal` |
 
 ### Outlook Mail
 | Command Template | Description | Example Usage |

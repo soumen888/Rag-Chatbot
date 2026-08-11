@@ -135,3 +135,13 @@ class LocalDB:
                 VALUES (?, ?, ?)
             """, (profile_name, service_type, timestamp))
             conn.commit()
+
+    def rename_profile(self, service_type, old_name, new_name):
+        """Renames a profile across emails and sync_history tables."""
+        email_table = "google_emails" if service_type == "google" else "microsoft_emails"
+        with self._get_connection() as conn:
+            # Update emails
+            conn.execute(f"UPDATE {email_table} SET profile_name = ? WHERE profile_name = ?", (new_name, old_name))
+            # Update sync history
+            conn.execute("UPDATE sync_history SET profile_name = ? WHERE profile_name = ?", (new_name, old_name))
+            conn.commit()

@@ -139,6 +139,40 @@ def handle_cli_commands():
         show_help_menu()
         sys.exit(0)
 
+    # Example: rename-profile google dev personal
+    if args[0] == 'rename-profile':
+        if len(args) < 4:
+            print("[!] Usage: ragchat rename-profile <service> <old_name> <new_name>")
+            sys.exit(1)
+        service = args[1].lower()
+        old_name = args[2]
+        new_name = args[3]
+
+        if service not in ['google', 'microsoft']:
+            print(f"[!] Unsupported service for rename: '{service}'. Only 'google' and 'microsoft' are supported.")
+            sys.exit(1)
+
+        try:
+            # 1. Update credential files
+            if service == 'google':
+                auth = GoogleAuthManager()
+            else:
+                auth = MicrosoftAuthManager()
+
+            success = auth.rename_profile(old_name, new_name)
+            if not success:
+                print(f"[!] Failed to rename credential profile. Check if profile '{old_name}' exists.")
+                sys.exit(1)
+
+            # 2. Update local database history
+            db = LocalDB()
+            db.rename_profile(service, old_name, new_name)
+
+            print(f"[+] Successfully renamed {service} profile '{old_name}' to '{new_name}' across credentials and database!")
+        except Exception as e:
+            print(f"[!] Error during rename-profile: {e}")
+        sys.exit(0)
+
     # Example: link google dev
     if args[0] == 'link':
         if len(args) < 3:

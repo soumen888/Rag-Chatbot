@@ -49,6 +49,14 @@ class MicrosoftAuthManager:
             return True
         return False
 
+    def rename_profile(self, old_name, new_name):
+        accounts = self._load_accounts()
+        if old_name not in accounts:
+            return False
+        accounts[new_name] = accounts.pop(old_name)
+        self._save_accounts(accounts)
+        return True
+
     def get_token(self, profile_name):
         """
         Retrieves a valid access token for the profile.
