@@ -74,9 +74,9 @@ class GoogleSyncEngine:
             'body': body
         }
 
-    def sync_gmail(self, profile_name, limit=50):
-        """Fetches recent emails, filters duplicates using SQLite, and saves them."""
-        print(f"[*] Starting Gmail sync for profile: '{profile_name}'...")
+    def sync_gmail(self, profile_name, limit=50, sync_all=False):
+        """Fetches recent emails, filters duplicates using SQLite, and saves them. If sync_all=True, paginates all emails."""
+        print(f"[*] Starting Gmail sync for profile: '{profile_name}' (Sync All: {sync_all})...")
         try:
             creds = self.auth_manager.get_credentials(profile_name)
             client = GoogleClient(creds)
@@ -84,15 +84,32 @@ class GoogleSyncEngine:
             print(f"[!] Authentication error for profile '{profile_name}': {e}")
             return 0
 
-        # Construct query based on last sync timestamp
-        last_sync = self.local_db.get_last_sync(profile_name, 'gmail')
+        # Construct query based on last sync timestamp (only if not syncing everything)
         query = ""
-        if last_sync:
-            # Query Gmail for messages after the last sync timestamp
-            query = f"after:{last_sync}"
+        if not sync_all:
+            last_sync = self.local_db.get_last_sync(profile_name, 'gmail')
+            if last_sync:
+                query = f"after:{last_sync}"
+        
+        messages_list = []
+        page_token = None
         
         try:
-            messages_list = client.gmail.list_emails(max_results=limit, query=query)
+            while True:
+                # Fetch N messages at a time (larger page size if syncing all to reduce API hits)
+                fetch_size = 100 if sync_all else limit
+                msgs, next_token = client.gmail.list_emails(max_results=fetch_size, query=query, page_token=page_token)
+                messages_list.extend(msgs)
+                
+                # If we aren't performing a full history sync or there's no more pages, break
+                if not sync_all or not next_token:
+                    break
+                page_token = next_token
+                
+                # Cap the safety limit on full syncs to 1000 messages to prevent infinite loops
+                if len(messages_list) >= 1000:
+                    print("[*] Reached full sync safety cap (1000 emails). Wrapping up...")
+                    break
         except Exception as e:
             print(f"[!] Failed to list messages from Gmail: {e}")
             return 0
@@ -181,9 +198,9 @@ class MicrosoftSyncEngine:
             'body': body
         }
 
-    def sync_outlook(self, profile_name, limit=50):
-        """Fetches recent emails from Outlook via Microsoft Graph and saves them."""
-        print(f"[*] Starting Outlook sync for profile: '{profile_name}'...")
+    def sync_outlook(self, profile_name, limit=50, sync_all=False):
+        """Fetches recent emails from Outlook via Microsoft Graph and saves them. If sync_all=True, paginates all emails."""
+        print(f"[*] Starting Outlook sync for profile: '{profile_name}' (Sync All: {sync_all})...")
         from microsoft.client import MicrosoftClient
         try:
             token = self.auth_manager.get_token(profile_name)
@@ -192,10 +209,25 @@ class MicrosoftSyncEngine:
             print(f"[!] Authentication error for profile '{profile_name}': {e}")
             return 0
 
+        messages_list = []
+        next_link = None
+        
         # Sync from Outlook
         try:
-            # Graph list_emails returns top-N emails
-            messages_list = client.outlook.list_emails(max_results=limit)
+            while True:
+                fetch_size = 100 if sync_all else limit
+                msgs, next_token = client.outlook.list_emails(max_results=fetch_size, next_link=next_link)
+                messages_list.extend(msgs)
+                
+                # Stop if not syncing all or no more pages
+                if not sync_all or not next_token:
+                    break
+                next_link = next_token
+                
+                # Cap the safety limit on full syncs to 1000 messages to prevent infinite loops
+                if len(messages_list) >= 1000:
+                    print("[*] Reached full sync safety cap (1000 emails). Wrapping up...")
+                    break
         except Exception as e:
             print(f"[!] Failed to list messages from Outlook: {e}")
             return 0

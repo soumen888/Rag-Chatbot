@@ -9,16 +9,21 @@ class OutlookMailClient:
             "Content-Type": "application/json"
         }
 
-    def list_emails(self, max_results=10, search_query=None):
-        """Lists Outlook messages."""
-        url = f"{self.base_url}/me/messages"
-        params = {"$top": max_results}
-        if search_query:
-            params["$search"] = f'"{search_query}"'
+    def list_emails(self, max_results=10, search_query=None, next_link=None):
+        """Lists Outlook messages, returning a tuple (messages, next_link_url)."""
+        if next_link:
+            url = next_link
+            params = {}
+        else:
+            url = f"{self.base_url}/me/messages"
+            params = {"$top": max_results}
+            if search_query:
+                params["$search"] = f'"{search_query}"'
         
         response = requests.get(url, headers=self.headers, params=params)
         response.raise_for_status()
-        return response.json().get("value", [])
+        data = response.json()
+        return data.get("value", []), data.get("@odata.nextLink")
 
     def get_email(self, message_id):
         """Gets a detailed message."""

@@ -16,6 +16,7 @@ Use these commands directly in your terminal to sync, link, and manipulate works
 | Command Template | Description | Example Usage |
 | :--- | :--- | :--- |
 | `ragchat -g <profile> <time>` | Sync and list Gmail messages within a specific time window. | `ragchat -g dev 10h` <br> `ragchat -g dev 1m` |
+| `ragchat sync google <profile> all` | Performs a full history pagination sync of all messages in the Gmail inbox. | `ragchat sync google dev all` |
 
 ### Google Sheets
 | Command Template | Description | Example Usage |
@@ -41,6 +42,7 @@ Use these commands directly in your terminal to sync, link, and manipulate works
 | Command Template | Description | Example Usage |
 | :--- | :--- | :--- |
 | `ragchat -m <profile> <time>` | Sync and list Outlook emails within a specific time window. | `ragchat -m work 2d` |
+| `ragchat sync microsoft <profile> all` | Performs a full history pagination sync of all messages in the Outlook inbox. | `ragchat sync microsoft public all` |
 
 ---
 

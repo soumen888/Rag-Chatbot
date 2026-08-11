@@ -6,12 +6,19 @@ class GmailClient:
     def __init__(self, credentials):
         self.service = build('gmail', 'v1', credentials=credentials)
 
-    def list_emails(self, max_results=10, query="", include_spam_trash=True):
-        """Lists Gmail messages matching a query, including Spam and Trash by default."""
-        results = self.service.users().messages().list(
-            userId='me', maxResults=max_results, q=query, includeSpamTrash=include_spam_trash
-        ).execute()
-        return results.get('messages', [])
+    def list_emails(self, max_results=10, query="", include_spam_trash=True, page_token=None):
+        """Lists Gmail messages matching a query, returning a tuple (messages, next_page_token)."""
+        params = {
+            'userId': 'me',
+            'maxResults': max_results,
+            'q': query,
+            'includeSpamTrash': include_spam_trash
+        }
+        if page_token:
+            params['pageToken'] = page_token
+            
+        results = self.service.users().messages().list(**params).execute()
+        return results.get('messages', []), results.get('nextPageToken')
 
     def get_email(self, message_id):
         """Retrieves details of a specific message by ID."""
