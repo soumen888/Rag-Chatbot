@@ -1,28 +1,7 @@
-# Python cache and temporary files
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.pytest_cache/
-.coverage
-htmlcov/
-build/
-dist/
-*.egg-info/
-
-# Local databases and caches
+.env
+.DS_Store
 chroma_db/
 ragchat_db/
 .crawl_cache/
-test_chroma/
-
-# Telegram session files (contain full auth tokens — NEVER commit these!)
-*.session
-*.session-journal
-
-# Environment configurations (contains API keys!)
-.env
-
-# OS-specific files
-.DS_Store
-Thumbs.db
