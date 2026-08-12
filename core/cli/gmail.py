@@ -35,7 +35,7 @@ def handle_gmail_cli(args):
     table.add_column("Date", style="cyan", no_wrap=True)
     table.add_column("From", style="green")
     table.add_column("Subject", style="magenta")
-    table.add_column("Snippet", style="white")
+    table.add_column("Snippet", style="default")
     
     for email_data in emails:
         dt_str = email_data['date']
