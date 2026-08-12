@@ -33,8 +33,8 @@ jobs:
 
       - name: Check Python Syntax & Imports
         run: |
-          python -m py_compile main.py services/website/__init__.py services/website/crawler.py services/telegram/__init__.py services/telegram/ingestor.py core/__init__.py core/chunker.py core/vector_db.py core/chatbot.py
-          python -c "import services.website, services.telegram, core; print('All modules imported successfully!')"
+          python -m py_compile main.py website/__init__.py website/crawler.py services/telegram/__init__.py services/telegram/ingestor.py core/__init__.py core/chunker.py core/vector_db.py core/chatbot.py
+          python -c "import website, services.telegram, core; print('All modules imported successfully!')"
 
   test-install-scripts:
     name: Test Installer Scripts Syntax
