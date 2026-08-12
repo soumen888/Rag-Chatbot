@@ -31,7 +31,7 @@ def show_help_menu():
 def handle_cli_commands():
     """Handles structured non-interactive CLI commands by routing them to core.cli_handlers."""
     import sys
-    from core.cli_handlers import (
+    from ragchat_core.core.cli_handlers import (
         handle_rename_profile_cli,
         handle_sync_cli,
         handle_link_cli,
