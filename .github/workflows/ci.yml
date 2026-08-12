@@ -34,7 +34,7 @@ jobs:
       - name: Check Python Syntax & Imports
         run: |
           find . -name "*.py" -type f ! -path "./venv/*" ! -path "./.venv/*" ! -path "./.git/*" -exec python -m py_compile {} +
-          python -c "import website, Services.telegram, core; print('All modules imported successfully!')"
+          python -c "import website, services.telegram, core; print('All modules imported successfully!')"
 
   test-install-scripts:
     name: Test Installer Scripts Syntax
