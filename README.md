@@ -73,3 +73,15 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.ragchat"
 brew uninstall ragchat
 brew untap soumen888/ragchat
 ```
+
+---
+
+## Supported Connections
+
+RAGChat allows you to index and search across your personal and work workspace apps:
+
+- **Google**: Gmail, Drive, Sheets, Docs, Tasks, and Calendar.
+- **Microsoft**: Outlook Mail, OneDrive, Tasks, and Calendar.
+- **Messaging**: Telegram channels/groups and Discord servers/DMs.
+- **Web**: Website web crawling and documentation indexing.
+
