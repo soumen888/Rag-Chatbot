@@ -41,6 +41,39 @@ def handle_rename_profile_cli(args):
         print(f"[!] Error during rename-profile: {e}")
     sys.exit(0)
 
+def prompt_discord_linking_flow(profile_name, cfg):
+    """Walks the user through connecting a Discord account (Bot or User token)."""
+    print("\nSelect Discord connection mode:")
+    print("1. Admin Bot (Requires Bot Token - Best for Server Admins)")
+    print("2. Discord User Token (Best for normal users / VPS deployments)")
+    mode = input("Select (1-2): ").strip()
+    
+    if mode == "2":
+        print("\n" + "="*70)
+        print("          HOW TO GET YOUR DISCORD USER TOKEN (NO BROWSER NEEDED ON VPS)")
+        print("="*70)
+        print("1. Open Discord in your desktop web browser (Chrome/Firefox) and log in.")
+        print("2. Press F12 (Cmd+Opt+I on Mac) to open Developer Tools.")
+        print("3. Go to the 'Network' tab.")
+        print("4. Click on any channel or send a message to trigger network activity.")
+        print("5. Search the network list for a request named 'science' or 'messages'.")
+        print("6. Click on it, look at the 'Request Headers', and copy the 'Authorization' value.")
+        print("   (It should look like a long string of random characters).")
+        print("="*70)
+        print("⚠️  SECURITY WARNING:")
+        print("   Your Token gives FULL access to your Discord account.")
+        print("   - NEVER share this token with anyone.")
+        print("   - If leaked, change your Discord Password immediately to revoke it.")
+        print("="*70 + "\n")
+
+    token = getpass.getpass("Enter Discord Token: ").strip()
+    if token:
+        is_bot = (mode == "1")
+        cfg.add_ds_profile(profile_name, token, is_bot=is_bot)
+        print(f"[+] Discord profile '{profile_name}' successfully connected!")
+    else:
+        print("[!] Token cannot be empty.")
+
 def handle_link_cli(args):
     """Handles authorization link configurations."""
     if len(args) < 3:
@@ -85,16 +118,5 @@ def handle_link_cli(args):
         sys.exit(0)
 
     elif service == 'discord':
-        print("Select Discord connection mode:")
-        print("1. Admin Bot (Requires Bot Token)")
-        print("2. Paste Discord User Token directly")
-        mode = input("Select (1-2): ").strip()
-        
-        token = getpass.getpass("Enter Token: ").strip()
-        if token:
-            is_bot = (mode == "1")
-            cfg.add_ds_profile(profile_name, token, is_bot=is_bot)
-            print(f"[+] Discord profile '{profile_name}' added!")
-        else:
-            print("[!] Token cannot be empty.")
+        prompt_discord_linking_flow(profile_name, cfg)
         sys.exit(0)

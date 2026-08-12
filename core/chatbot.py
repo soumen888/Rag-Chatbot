@@ -56,6 +56,9 @@ class LiteLLMProvider(BaseLLMProvider):
 
     def __init__(self, provider_type: str, api_key: str = "", model: str = "", base_url: str = None):
         import litellm
+        import logging
+        litellm.set_verbose = False
+        logging.getLogger("LiteLLM").setLevel(logging.ERROR)
         self.litellm = litellm
         self.provider_type = provider_type
         self.api_key = api_key

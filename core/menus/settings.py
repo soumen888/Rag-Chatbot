@@ -44,16 +44,13 @@ def init_llm_provider_wrapper():
 def interactive_setup_wizard(cfg):
     """Wizard triggered when no LLM credentials exist in .env."""
     print("\n==================================================")
-    print("           First-Time Setup Wizard                ")
+    print("               LLM Setup Wizard                   ")
     print("==================================================")
-    print("To use RAGChat, let's configure your LLM provider.")
     
     print("\nSelect your LLM Provider:")
     providers = list(PROVIDER_INFO.keys())
     for idx, p in enumerate(providers):
-        name = PROVIDER_INFO[p]["name"]
-        default_model = PROVIDER_INFO[p]["model_default"]
-        print(f"{idx + 1}. {name} (Default: {default_model})")
+        print(f"{idx + 1}. {PROVIDER_INFO[p]['name']}")
     print("0. Skip setup for now")
         
     choice = input(f"Select provider (0-{len(providers)}) or 'skip': ").strip().lower()
@@ -63,18 +60,101 @@ def interactive_setup_wizard(cfg):
 
     if not choice.isdigit() or int(choice) < 1 or int(choice) > len(providers):
         print("[!] Invalid choice. Defaulting to Google AI Studio.")
-        selected = "google"
+        selected_provider = "google"
     else:
-        selected = providers[int(choice) - 1]
-        
-    cfg.write_env_var("LLM_PROVIDER", selected)
+        selected_provider = providers[int(choice) - 1]
+
+    # Pre-indexed LiteLLM model directory mapping (model_name, provider_key)
+    import litellm
+    common_models = []
+    try:
+        for provider, models in litellm.models_by_provider.items():
+            prov_key = provider.lower()
+            if prov_key == "gemini":
+                prov_key = "google"
+            elif prov_key == "openai":
+                prov_key = "openai"
+                
+            for m in models:
+                common_models.append((m, prov_key))
+    except Exception:
+        # Fallback to standard core models if litellm registry structure changes
+        common_models = [
+            ("gemini-1.5-flash", "google"), ("gemini-1.5-pro", "google"),
+            ("gpt-4o-mini", "openai"), ("gpt-4o", "openai"),
+            ("claude-3-5-sonnet-20241022", "anthropic"), ("claude-3-5-haiku-20241022", "anthropic"),
+            ("groq/llama-3.3-70b-versatile", "groq"), ("groq/llama-3.1-70b-versatile", "groq")
+        ]
+
+    # Filter common models by selected provider
+    provider_models = [m for m in common_models if m[1] == selected_provider]
+    prov_name_display = PROVIDER_INFO.get(selected_provider, {}).get("name", selected_provider)
+
+    print(f"\nSearch for a model hosted on {prov_name_display} (e.g. flash, gpt4, claude, local):")
+    search_query = input("Model Search: ").strip().lower()
     
-    local_providers = {"ollama", "lmstudio"}
-    if selected not in local_providers:
-        key = getpass.getpass(f"Enter your API key for {PROVIDER_INFO[selected]['name']}: ").strip()
-        cfg.write_env_var("LLM_API_KEY", key)
+    # Split search query for flexible partial matching
+    query_parts = search_query.split()
+    matches = []
+    for m in provider_models:
+        model_name_lower = m[0].lower()
+        if all(part in model_name_lower for part in query_parts):
+            matches.append(m)
+            
+    selected_model = None
+    
+    if matches:
+        print(f"\nMatching models for {prov_name_display}:")
+        for idx, match in enumerate(matches):
+            # Clean display name (strip provider prefixes if they exist)
+            display_name = match[0]
+            if display_name.startswith(selected_provider + "/"):
+                display_name = display_name[len(selected_provider) + 1:]
+            elif selected_provider == "google" and display_name.startswith("gemini/"):
+                display_name = display_name[7:]
+            print(f"{idx + 1}. {display_name}")
+        print(f"{len(matches) + 1}. Enter custom model name string manually")
         
-    print("[+] Configuration completed! Saved to .env.")
+        sel = input(f"Select option (1-{len(matches) + 1}, default 1): ").strip()
+        if sel.isdigit():
+            idx = int(sel) - 1
+            if 0 <= idx < len(matches):
+                selected_model = matches[idx][0]
+            elif idx == len(matches):
+                selected_model = input("Enter custom model name: ").strip()
+        else:
+            selected_model = matches[0][0]
+    else:
+        print(f"[-] No matching models found under {prov_name_display}.")
+        selected_model = input("Enter custom model name manually: ").strip()
+        
+    # Auto-prefix Google/Gemini models if needed for LiteLLM format
+    if selected_provider == "google" and not selected_model.startswith("gemini/") and not "/" in selected_model:
+        selected_model = f"gemini/{selected_model}"
+            
+    # Save provider and model variables
+    cfg.write_env_var("LLM_PROVIDER", selected_provider)
+    cfg.write_env_var("LLM_MODEL", selected_model)
+    os.environ["LLM_PROVIDER"] = selected_provider
+    os.environ["LLM_MODEL"] = selected_model
+    
+    # 3. Prompt for API Key (if not a local provider)
+    local_providers = {"ollama", "lmstudio"}
+    if selected_provider not in local_providers:
+        prov_display = PROVIDER_INFO.get(selected_provider, {}).get("name", selected_provider)
+        key = getpass.getpass(f"\nEnter API key for {prov_display}: ").strip()
+        cfg.write_env_var("LLM_API_KEY", key)
+        os.environ["LLM_API_KEY"] = key
+        
+    # 4. Handle base URL if LM Studio or Ollama is selected
+    if selected_provider in local_providers:
+        default_url = "http://localhost:11434" if selected_provider == "ollama" else "http://localhost:1234/v1"
+        url = input(f"\nEnter local API endpoint (default {default_url}): ").strip()
+        url_val = url if url else default_url
+        cfg.write_env_var("LLM_BASE_URL", url_val)
+        os.environ["LLM_BASE_URL"] = url_val
+        
+    print("[+] Configuration completed! Saved and loaded dynamically into environment.")
 
 def handle_settings_menu(cfg):
     g_manager = GoogleAuthManager()
@@ -120,21 +200,8 @@ def handle_settings_menu(cfg):
                 print("[!] Profile name is required.")
                 continue
 
-            print("\nSelect Discord connection mode:")
-            print("1. Admin Bot (Requires Bot Token)")
-            print("2. Paste Discord User Token directly")
-            mode = input("Select (1-2): ").strip()
-
-            if mode == "1":
-                token = getpass.getpass("Enter Discord Bot Token: ").strip()
-                if token:
-                    cfg.add_ds_profile(profile_name, token, is_bot=True)
-                    print(f"[+] Discord bot profile '{profile_name}' added!")
-            elif mode == "2":
-                token = getpass.getpass("Enter Discord User Token: ").strip()
-                if token:
-                    cfg.add_ds_profile(profile_name, token, is_bot=False)
-                    print(f"[+] Discord user profile '{profile_name}' added!")
+            from core.cli.auth import prompt_discord_linking_flow
+            prompt_discord_linking_flow(profile_name, cfg)
 
         elif sub == "3":
             profile_name = input("Enter a label for this Google profile (e.g. personal, work): ").strip()
