@@ -13,3 +13,7 @@ rfc3987
 # Universal LLM Provider Interface (Gemini, OpenAI, Anthropic, Groq, Ollama, etc.)
 litellm
 
+# Google & Microsoft Integrations
+google-auth-oauthlib
+google-api-python-client
+msal
