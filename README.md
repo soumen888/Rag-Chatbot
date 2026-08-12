@@ -14,7 +14,21 @@ Once installed, launch from anywhere:
 ragchat
 ```
 
-### Option 2: Homebrew (macOS / Linux)
+### Option 2: PowerShell (Windows)
+
+Run the one-liner installer in PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/soumen888/Rag-Chatbot/main/install/windows.ps1 | iex
+```
+
+Once installed, restart PowerShell and launch from anywhere:
+
+```powershell
+ragchat
+```
+
+### Option 3: Homebrew (macOS / Linux)
 
 ```bash
 brew install soumen888/ragchat/ragchat
@@ -41,10 +55,16 @@ For the complete reference guide of all available direct CLI commands (Google Dr
 
 ## Uninstallation
 
-### Uninstall curl installation:
+### Uninstall macOS / Linux curl installation:
 
 ```bash
 rm -rf ~/.ragchat ~/.local/bin/ragchat /usr/local/bin/ragchat
+```
+
+### Uninstall Windows PowerShell installation:
+
+```powershell
+Remove-Item -Recurse -Force "$env:USERPROFILE\.ragchat"
 ```
 
 ### Uninstall Homebrew installation:
