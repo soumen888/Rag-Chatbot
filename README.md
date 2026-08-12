@@ -35,6 +35,10 @@ pip install -r requirements.txt
 python3 main.py
 ```
 
+## CLI Commands & Reference
+
+For the complete reference guide of all available direct CLI commands (Google Drive, Gmail, Sheets, Outlook, OneDrive, Telegram, Discord, and time windows), check out the **[CLI Commands Reference Guide](commands.md)**.
+
 ## Uninstallation
 
 ### Uninstall curl installation:
