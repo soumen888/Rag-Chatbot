@@ -1,7 +1,15 @@
 import os
 from urllib.parse import urlparse
-from website import DocCrawler
-from core.chunker import DocChunker
+try:
+    from ragchat_core.website.crawler import DocCrawler
+    from ragchat_core.core.chunker import DocChunker
+except ImportError:
+    try:
+        from website.crawler import DocCrawler
+        from core.chunker import DocChunker
+    except ImportError:
+        from website import DocCrawler
+        from core.chunker import DocChunker
 
 def handle_website_menu(db):
     while True:

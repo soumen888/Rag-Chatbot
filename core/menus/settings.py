@@ -2,11 +2,11 @@ import os
 import sys
 import getpass
 from dotenv import load_dotenv
-from core.chatbot import get_provider, PROVIDER_INFO
-from core.config_manager import ConfigManager
-from services.google.auth import GoogleAuthManager
-from services.microsoft.auth import MicrosoftAuthManager
-from services.telegram import TelegramIngestor
+from ragchat_core.core.chatbot import get_provider, PROVIDER_INFO
+from ragchat_core.core.config_manager import ConfigManager
+from ragchat_core.services.google.auth import GoogleAuthManager
+from ragchat_core.services.microsoft.auth import MicrosoftAuthManager
+from ragchat_core.services.telegram.ingestor import TelegramIngestor
 
 def db_safe_profile_name(name):
     import re

@@ -1,5 +1,5 @@
 import sys
-from core.sync import GoogleSyncEngine, MicrosoftSyncEngine
+from ragchat_core.core.sync import GoogleSyncEngine, MicrosoftSyncEngine
 
 def handle_sync_cli(args):
     """Handles full account synchronization."""

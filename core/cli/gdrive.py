@@ -1,6 +1,6 @@
 import sys
-from services.google.auth import GoogleAuthManager
-from services.google.client import GoogleClient
+from ragchat_core.services.google.auth import GoogleAuthManager
+from ragchat_core.services.google.client import GoogleClient
 
 def handle_drive_cli(args):
     """Handles Google Drive file searching and listing."""

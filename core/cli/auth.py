@@ -1,10 +1,10 @@
 import sys
 import getpass
-from core.config_manager import ConfigManager
-from core.db import LocalDB
-from services.google.auth import GoogleAuthManager
-from services.microsoft.auth import MicrosoftAuthManager
-from services.telegram.ingestor import TelegramIngestor
+from ragchat_core.core.config_manager import ConfigManager
+from ragchat_core.core.db import LocalDB
+from ragchat_core.services.google.auth import GoogleAuthManager
+from ragchat_core.services.microsoft.auth import MicrosoftAuthManager
+from ragchat_core.services.telegram.ingestor import TelegramIngestor
 
 def db_safe_profile_name(name):
     import re

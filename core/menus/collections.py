@@ -1,5 +1,5 @@
 import os
-from core.menus.chat import format_col_display
+from .chat import format_col_display
 
 def handle_collections_menu(db):
     while True:

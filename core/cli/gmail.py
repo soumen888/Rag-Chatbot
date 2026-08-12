@@ -1,9 +1,9 @@
 import sys
 from rich.console import Console
 from rich.table import Table
-from core.sync import GoogleSyncEngine
-from core.db import LocalDB
-from core.cli_handlers import parse_time_window
+from ragchat_core.core.sync import GoogleSyncEngine
+from ragchat_core.core.db import LocalDB
+from ragchat_core.core.cli_handlers import parse_time_window
 
 def handle_gmail_cli(args):
     """Syncs and lists recent Google Gmail messages."""

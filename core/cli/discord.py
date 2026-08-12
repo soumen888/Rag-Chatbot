@@ -1,9 +1,9 @@
 import os
 import sys
-from core.chunker import DocChunker
-from core.config_manager import ConfigManager
-from core.vector_db import VectorDB
-from services.discord import DiscordIngestor
+from ragchat_core.core.chunker import DocChunker
+from ragchat_core.core.config_manager import ConfigManager
+from ragchat_core.core.vector_db import VectorDB
+from ragchat_core.services.discord.ingestor import DiscordIngestor
 
 def handle_discord_cli(args):
     """Handles Discord CLI sync commands."""

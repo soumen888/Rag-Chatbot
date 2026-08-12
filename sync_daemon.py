@@ -7,12 +7,14 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 
-from services.telegram import TelegramIngestor
-from services.discord import DiscordIngestor
-from services.google.auth import GoogleAuthManager
-from services.microsoft.auth import MicrosoftAuthManager
-from core.sync import GoogleSyncEngine, MicrosoftSyncEngine
-from core import DocChunker, VectorDB, ConfigManager
+from ragchat_core.services.telegram.ingestor import TelegramIngestor
+from ragchat_core.services.discord.ingestor import DiscordIngestor
+from ragchat_core.services.google.auth import GoogleAuthManager
+from ragchat_core.services.microsoft.auth import MicrosoftAuthManager
+from ragchat_core.core.sync import GoogleSyncEngine, MicrosoftSyncEngine
+from ragchat_core.core.chunker import DocChunker
+from ragchat_core.core.vector_db import VectorDB
+from ragchat_core.core.config_manager import ConfigManager
 
 def run_daemon():
     print("==================================================")

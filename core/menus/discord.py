@@ -2,8 +2,8 @@ import os
 from datetime import datetime, timezone, timedelta
 from rich.console import Console
 from rich.markdown import Markdown
-from services.discord import DiscordIngestor
-from core.chunker import DocChunker
+from ragchat_core.services.discord.ingestor import DiscordIngestor
+from ragchat_core.core.chunker import DocChunker
 
 def select_ds_profile(cfg):
     profiles = cfg.load_ds_profiles()

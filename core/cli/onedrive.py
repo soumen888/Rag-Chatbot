@@ -1,6 +1,6 @@
 import sys
-from services.microsoft.auth import MicrosoftAuthManager
-from services.microsoft.client import MicrosoftClient
+from ragchat_core.services.microsoft.auth import MicrosoftAuthManager
+from ragchat_core.services.microsoft.client import MicrosoftClient
 
 def handle_onedrive_cli(args):
     """Handles Microsoft OneDrive file listing and search."""

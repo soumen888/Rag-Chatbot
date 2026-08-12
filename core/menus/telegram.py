@@ -1,9 +1,9 @@
 import os
 from rich.console import Console
 from rich.markdown import Markdown
-from services.telegram import TelegramIngestor
-from core.chunker import DocChunker
-from core.config_manager import ConfigManager
+from ragchat_core.services.telegram.ingestor import TelegramIngestor
+from ragchat_core.core.chunker import DocChunker
+from ragchat_core.core.config_manager import ConfigManager
 
 def db_safe_profile_name(name):
     import re
