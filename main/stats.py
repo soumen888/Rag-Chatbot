@@ -43,6 +43,6 @@ def print_banner():
     
     console = Console()
     console.print("[bold cyan]========================================================================[/bold cyan]")
-    console.print("[bold white]                   Universal Documentation Chat (RAG)                  [/bold white]")
+    console.print("[bold]                   Universal Documentation Chat (RAG)                  [/bold]")
     console.print(f"[dim]  {stats_str}  [/dim]")
     console.print("[bold cyan]========================================================================[/bold cyan]")
