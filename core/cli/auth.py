@@ -74,6 +74,57 @@ def prompt_discord_linking_flow(profile_name, cfg):
     else:
         print("[!] Token cannot be empty.")
 
+def listen_for_vercel_oauth(service, profile_name, port=8080):
+    """Spins up a local HTTP listener and opens Vercel Auth Gateway in browser."""
+    import webbrowser
+    import urllib.parse
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+
+    auth_data = {}
+
+    class OAuthCallbackHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            parsed = urllib.parse.urlparse(self.path)
+            params = urllib.parse.parse_qs(parsed.query)
+
+            if 'access_token' in params or 'refresh_token' in params:
+                auth_data['access_token'] = params.get('access_token', [''])[0]
+                auth_data['refresh_token'] = params.get('refresh_token', [''])[0]
+                auth_data['provider'] = params.get('provider', [service])[0]
+                auth_data['profile'] = params.get('profile', [profile_name])[0]
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                html = """
+                <html>
+                <body style="font-family: system-ui; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+                  <div style="text-align: center; border: 1px solid #27272a; padding: 30px; border-radius: 12px; background: #09090b;">
+                    <h2 style="color: #38bdf8; margin-top: 0;">Authentication Successful!</h2>
+                    <p style="color: #a1a1aa;">RAGChat account profile has been linked. You can close this browser tab and return to your terminal.</p>
+                  </div>
+                </body>
+                </html>
+                """
+                self.wfile.write(html.encode('utf-8'))
+            else:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b"Authentication failed.")
+
+        def log_message(self, format, *args):
+            pass
+
+    server = HTTPServer(('127.0.0.1', port), OAuthCallbackHandler)
+    gateway_url = f"https://ragchat-beta.vercel.app/api/auth/{service}?port={port}&profile={profile_name}"
+    
+    print(f"[*] Opening Vercel Auth Gateway in your browser...")
+    print(f"[*] Gateway URL: {gateway_url}")
+    webbrowser.open(gateway_url)
+
+    server.handle_request()
+    return auth_data
+
 def handle_link_cli(args):
     """Handles authorization link configurations."""
     if len(args) < 3:
@@ -84,22 +135,31 @@ def handle_link_cli(args):
     profile_name = args[2]
     cfg = ConfigManager()
 
-    if service == 'google':
+    if service in ['google', 'microsoft']:
         try:
-            g_manager = GoogleAuthManager()
-            g_manager.authenticate_profile(profile_name)
-            print(f"[+] Google profile '{profile_name}' successfully linked!")
+            auth_data = listen_for_vercel_oauth(service, profile_name)
+            if auth_data.get('access_token') or auth_data.get('refresh_token'):
+                if service == 'google':
+                    auth = GoogleAuthManager()
+                    accounts = auth._load_accounts()
+                    accounts[profile_name] = {
+                        "token": auth_data.get('access_token'),
+                        "refresh_token": auth_data.get('refresh_token')
+                    }
+                    auth._save_accounts(accounts)
+                else:
+                    auth = MicrosoftAuthManager()
+                    accounts = auth._load_accounts()
+                    accounts[profile_name] = {
+                        "token": auth_data.get('access_token'),
+                        "refresh_token": auth_data.get('refresh_token')
+                    }
+                    auth._save_accounts(accounts)
+                print(f"[+] {service.capitalize()} profile '{profile_name}' successfully linked via Vercel Gateway!")
+            else:
+                print(f"[!] {service.capitalize()} authorization failed or timed out.")
         except Exception as e:
-            print(f"[!] Google authorization failed: {e}")
-        sys.exit(0)
-
-    elif service == 'microsoft':
-        try:
-            ms_manager = MicrosoftAuthManager()
-            ms_manager.authenticate_profile(profile_name)
-            print(f"[+] Microsoft profile '{profile_name}' successfully linked!")
-        except Exception as e:
-            print(f"[!] Microsoft authorization failed: {e}")
+            print(f"[!] Authorization error: {e}")
         sys.exit(0)
 
     elif service == 'telegram':
