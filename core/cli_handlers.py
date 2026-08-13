@@ -64,3 +64,11 @@ def handle_telegram_cli(args):
 def handle_discord_cli(args):
     from core.cli.discord import handle_discord_cli as impl
     impl(args)
+
+def handle_bind_cli(args):
+    from core.cli.auth import handle_bind_cli as impl
+    impl(args)
+
+def handle_list_profiles_cli(args):
+    from core.cli.auth import handle_list_profiles_cli as impl
+    impl(args)
