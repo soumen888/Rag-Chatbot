@@ -1,3 +1,12 @@
+<p align="center">
+  <img src="Ragchat.png" alt="Ragchat Logo" width="220" />
+</p>
+
+<h1 align="center">Ragchat</h1>
+<p align="center"><strong>The Local AI Agent for Private Workflows.</strong></p>
+
+---
+
 ## Installation
 
 ### Option 1: curl (macOS / Linux)
