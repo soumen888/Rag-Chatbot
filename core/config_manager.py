@@ -41,6 +41,19 @@ class ConfigManager:
         # Keep os.environ in sync
         os.environ[key] = str(value)
 
+    def save_google_client_secrets(self, json_data):
+        """Saves Google OAuth client secrets data to ~/.config/ragchat/client_secrets.json."""
+        config_dir = os.path.expanduser("~/.config/ragchat")
+        os.makedirs(config_dir, exist_ok=True)
+        secrets_path = os.path.join(config_dir, "client_secrets.json")
+        with open(secrets_path, "w") as f:
+            if isinstance(json_data, dict):
+                json.dump(json_data, f, indent=2)
+            else:
+                f.write(str(json_data))
+        os.chmod(secrets_path, 0o600)
+        return secrets_path
+
     # ──────────────────────────────────────────────────────────────
     # Telegram Multi-Account Profiles
     # ──────────────────────────────────────────────────────────────

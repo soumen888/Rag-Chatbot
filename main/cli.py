@@ -63,6 +63,7 @@ def show_help_menu():
     console.print("[bold]CORE COMMANDS:[/bold]")
     console.print("  [bold green]-g <profile> <time>[/bold green]         Sync and list emails from a Google profile (zero LLM cost)")
     console.print("  [bold green]-m <profile> <time>[/bold green]         Sync and list emails from a Microsoft profile (zero LLM cost)")
+    console.print("  [bold green]bind [google] [file][/bold green]      Bind custom Google OAuth Client JSON credentials")
     console.print("  [bold green]link <service> <profile>[/bold green]   Link a new account profile (google, microsoft, telegram, discord)")
     console.print("  [bold green]chat <collection>[/bold green]          Start interactive chat with an ingested collection")
     console.print("  [bold green]sync[/bold green]                        Run full sync daemon on connected channels")
@@ -74,6 +75,7 @@ def show_help_menu():
     console.print("  [bold yellow]h[/bold yellow] : Hours    [bold yellow]d[/bold yellow] : Days    [bold yellow]w[/bold yellow] : Weeks    [bold yellow]m[/bold yellow] : Months (30 days)    [bold yellow]y[/bold yellow] : Years (365 days)\n")
     
     console.print("[bold]EXAMPLES:[/bold]")
+    console.print("  ragchat bind google ~/Downloads/client_secret.json # Bind custom Google OAuth JSON")
     console.print("  ragchat -g dev 10h                # List dev Gmail emails from last 10 hours")
     console.print("  ragchat link google dev           # Authenticate and link a new Google account named 'dev'")
     console.print("  ragchat update                    # Update RAGChat to the latest release")
@@ -94,23 +96,43 @@ def handle_cli_commands():
     if cmd in ['update', '--update']:
         handle_update()
 
-    from ragchat_core.core.cli_handlers import (
-        handle_rename_profile_cli,
-        handle_sync_cli,
-        handle_link_cli,
-        handle_drive_cli,
-        handle_onedrive_cli,
-        handle_sheet_cli,
-        handle_gmail_cli,
-        handle_outlook_cli,
-        handle_telegram_cli,
-        handle_discord_cli
-    )
+    try:
+        from core.cli_handlers import (
+            handle_rename_profile_cli,
+            handle_list_profiles_cli,
+            handle_sync_cli,
+            handle_link_cli,
+            handle_bind_cli,
+            handle_drive_cli,
+            handle_onedrive_cli,
+            handle_sheet_cli,
+            handle_gmail_cli,
+            handle_outlook_cli,
+            handle_telegram_cli,
+            handle_discord_cli
+        )
+    except ImportError:
+        from ragchat_core.core.cli_handlers import (
+            handle_rename_profile_cli,
+            handle_list_profiles_cli,
+            handle_sync_cli,
+            handle_link_cli,
+            handle_bind_cli,
+            handle_drive_cli,
+            handle_onedrive_cli,
+            handle_sheet_cli,
+            handle_gmail_cli,
+            handle_outlook_cli,
+            handle_telegram_cli,
+            handle_discord_cli
+        )
 
     commands = {
         'rename-profile': handle_rename_profile_cli,
+        'profiles': handle_list_profiles_cli,
         'sync': handle_sync_cli,
         'link': handle_link_cli,
+        'bind': handle_bind_cli,
         'drive': handle_drive_cli,
         'onedrive': handle_onedrive_cli,
         'sheet': handle_sheet_cli,

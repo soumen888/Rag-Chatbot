@@ -1,7 +1,36 @@
 __pycache__/
 *.pyc
 .env
+.env.*
+!.env.example
 .DS_Store
 chroma_db/
 ragchat_db/
 .crawl_cache/
+
+# OAuth credentials & tokens — NEVER commit these
+client_secrets.json
+client_secret_*.json
+credentials*.json
+google_accounts.json
+microsoft_accounts.json
+token.json
+*_token.json
+*.token
+
+# API keys and sensitive config
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.so
+*.dylib
+*.pyd
+*.c
+venv/
+.venv/
