@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Ragchat.png" alt="Ragchat Logo" width="220" />
+  <img src="logo.png" alt="Ragchat Logo" width="220" />
 </p>
 
 <h1 align="center">Ragchat</h1>
