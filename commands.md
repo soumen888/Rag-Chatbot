@@ -33,6 +33,8 @@ Use these commands directly in your terminal to sync, link, and manipulate works
 | :--- | :--- | :--- |
 | `ragchat drive <profile> list` | Lists all files and folders in your Google Drive root directory. | `ragchat drive dev list` |
 | `ragchat drive <profile> list --filter <sheets\|docs\|slides>` | Lists Google files filtered by type. | `ragchat drive dev list --filter docs` <br> `ragchat drive dev list --filter sheets` |
+| `ragchat drive <profile> download <file_id> [path]` | Download a file from Google Drive directly to disk. Defaults to Desktop. | `ragchat drive dev download "1aBcXyZ..." "~/Downloads"` |
+| `ragchat drive <profile> upload <local_path> [parent_id]` | Upload a file or entire folder recursively to Google Drive (max 500 files). | `ragchat drive dev upload "~/Desktop/Report.pdf"` |
 
 ---
 
@@ -55,6 +57,8 @@ Use these commands directly in your terminal to sync, link, and manipulate works
 | :--- | :--- | :--- |
 | `ragchat onedrive <profile> list` | Lists all files and folders in your OneDrive root directory. | `ragchat onedrive public list` |
 | `ragchat onedrive <profile> list <folder_path>` | Lists files inside a specific sub-folder path in OneDrive. | `ragchat onedrive public list "Documents/Work"` |
+| `ragchat onedrive <profile> download <item_id> [path]` | Download a file from OneDrive directly to disk. Defaults to Desktop. | `ragchat onedrive public download "01XYZ..." "~/Downloads"` |
+| `ragchat onedrive <profile> upload <local_path> [parent_id]` | Upload a file or entire folder recursively to OneDrive (max 500 files). | `ragchat onedrive public upload "~/Desktop/Presentation.pptx"` |
 
 ---
 
