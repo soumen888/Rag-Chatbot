@@ -9,6 +9,7 @@ def handle_update():
     console.print("[bold cyan][*] Checking for RAGChat updates...[/bold cyan]")
 
     # Standard curl / git installation update
+
     install_dir = os.path.expanduser("~/.ragchat")
     if os.path.exists(os.path.join(install_dir, ".git")):
         try:
