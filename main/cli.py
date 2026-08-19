@@ -9,7 +9,7 @@ from rich.console import Console
 
 import time
 
-CURRENT_VERSION = "1.1.5"
+CURRENT_VERSION = "1.1.6"
 LATEST_VERSION_FOUND = None
 
 def fetch_latest_release_worker():
