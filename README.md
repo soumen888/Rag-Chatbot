@@ -37,17 +37,6 @@ Once installed, restart PowerShell and launch from anywhere:
 ragchat
 ```
 
-### Option 3: Homebrew (macOS / Linux)
-
-```bash
-brew install soumen888/ragchat/ragchat
-```
-
-Once installed, launch from anywhere:
-
-```bash
-ragchat
-```
 
 ## CLI Commands & Reference
 
@@ -67,12 +56,6 @@ rm -rf ~/.ragchat ~/.local/bin/ragchat /usr/local/bin/ragchat
 Remove-Item -Recurse -Force "$env:USERPROFILE\.ragchat"
 ```
 
-### Uninstall Homebrew installation:
-
-```bash
-brew uninstall ragchat
-brew untap soumen888/ragchat
-```
 
 ---
 

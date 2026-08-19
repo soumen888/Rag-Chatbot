@@ -4,24 +4,9 @@ import subprocess
 from rich.console import Console
 
 def handle_update():
-    """Handles auto-updating RAGChat across Homebrew, macOS, Linux, and Windows."""
+    """Handles auto-updating RAGChat across macOS, Linux, and Windows."""
     console = Console()
     console.print("[bold cyan][*] Checking for RAGChat updates...[/bold cyan]")
-    
-    # Detect if installed via Homebrew
-    is_brew = False
-    try:
-        res = subprocess.run(["brew", "list", "ragchat"], capture_output=True, text=True)
-        if res.returncode == 0:
-            is_brew = True
-    except Exception:
-        pass
-
-    if is_brew:
-        console.print("[bold yellow][!] RAGChat was installed via Homebrew.[/bold yellow]")
-        console.print("To update, run:")
-        console.print("  [bold green]brew upgrade ragchat[/bold green]")
-        sys.exit(0)
 
     # Standard curl / git installation update
     install_dir = os.path.expanduser("~/.ragchat")
