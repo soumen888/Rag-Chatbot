@@ -1,0 +1,1 @@
+# core.menus package initialization
