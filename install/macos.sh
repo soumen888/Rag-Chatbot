@@ -5,7 +5,7 @@ set -e
 REPO_URL="https://github.com/soumen888/Rag-Chatbot.git"
 INSTALL_DIR="$HOME/.ragchat"
 BIN_DIR="$HOME/.local/bin"
-WHEEL_URL="https://github.com/soumen888/Rag-Chatbot/releases/download/v1.1.5/ragchat_core-1.1.5-cp311-cp311-macosx_26_0_arm64.whl"
+WHEEL_URL="https://github.com/soumen888/Rag-Chatbot/releases/download/v1.1.6/ragchat_core-1.1.6-cp311-cp311-macosx_26_0_arm64.whl"
 
 echo "=================================================="
 echo "          Installing RAGChat                      "
@@ -72,7 +72,7 @@ source venv/bin/activate
 
 # 4. Install Compiled Core Binary Wheel
 (
-    pip install "$WHEEL_URL" --quiet 2>/dev/null || pip install "/Users/soumen/Documents/VS Code/Public/Ragchat/Private/dist/ragchat_core-1.1.5-cp311-cp311-macosx_26_0_arm64.whl" --quiet 2>/dev/null || true
+    pip install "$WHEEL_URL" --quiet 2>/dev/null || pip install "/Users/soumen/Documents/VS Code/Public/Ragchat/Private/dist/ragchat_core-1.1.6-cp311-cp311-macosx_26_0_arm64.whl" --quiet 2>/dev/null || true
 ) &
 spinner $! "Installing compiled core binary engine..."
 
