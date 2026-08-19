@@ -1,7 +1,83 @@
 import os
 import sys
 import subprocess
+import threading
+import urllib.request
+import json
+import atexit
 from rich.console import Console
+
+import time
+
+CURRENT_VERSION = "1.1.5"
+LATEST_VERSION_FOUND = None
+
+def fetch_latest_release_worker():
+    global LATEST_VERSION_FOUND
+    config_dir = os.path.expanduser("~/.config/ragchat")
+    state_file = os.path.join(config_dir, "update_state.json")
+    os.makedirs(config_dir, exist_ok=True)
+
+    now = time.time()
+    last_check = 0.0
+    cached_version = None
+
+    if os.path.exists(state_file):
+        try:
+            with open(state_file, "r") as f:
+                state = json.load(f)
+                last_check = state.get("last_check", 0.0)
+                cached_version = state.get("latest_version")
+        except Exception:
+            pass
+
+    # If checked less than 24 hours (86400 seconds) ago, use cached value
+    if now - last_check < 86400.0 and cached_version is not None:
+        LATEST_VERSION_FOUND = cached_version
+        return
+
+    try:
+        url = "https://api.github.com/repos/soumen888/Rag-Chatbot/releases/latest"
+        req = urllib.request.Request(
+            url, 
+            headers={"User-Agent": "RAGChat-Client"}
+        )
+        with urllib.request.urlopen(req, timeout=3) as response:
+            data = json.loads(response.read().decode())
+            tag_name = data.get("tag_name", "").strip().lstrip("v")
+            if tag_name:
+                LATEST_VERSION_FOUND = tag_name
+                # Cache the successful result
+                with open(state_file, "w") as f:
+                    json.dump({"last_check": now, "latest_version": tag_name}, f)
+    except Exception:
+        # If API check failed, fall back to cached version if present to prevent errors
+        if cached_version:
+            LATEST_VERSION_FOUND = cached_version
+
+def print_update_notification():
+    if LATEST_VERSION_FOUND:
+        # Check if the latest version is greater than current version
+        try:
+            curr_parts = [int(x) for x in CURRENT_VERSION.split(".")]
+            latest_parts = [int(x) for x in LATEST_VERSION_FOUND.split(".")]
+            if latest_parts > curr_parts:
+                console = Console()
+                console.print("\n[bold cyan]========================================================================[/bold cyan]")
+                console.print(f"[bold green][*] A new RAGChat version is available: v{LATEST_VERSION_FOUND} (Installed: v{CURRENT_VERSION})[/bold green]")
+                console.print("[bold yellow][*] Run `ragchat update` or view release notes at:[/bold yellow]")
+                console.print("    [cyan]https://github.com/soumen888/Rag-Chatbot/releases[/cyan]")
+                console.print("    [cyan]https://ragchat-auth.vercel.app[/cyan]")
+                console.print("[bold cyan]========================================================================[/bold cyan]\n")
+        except Exception:
+            pass
+
+# Register termination update check alert
+atexit.register(print_update_notification)
+
+# Start background check thread immediately when cli.py is loaded
+check_thread = threading.Thread(target=fetch_latest_release_worker, daemon=True)
+check_thread.start()
 
 def handle_update():
     """Handles auto-updating RAGChat across macOS, Linux, and Windows."""
@@ -149,4 +225,8 @@ def handle_cli_commands():
         commands[cmd](args)
         sys.exit(0)
 
-    return False
+    # If there are CLI arguments but none of them matched, it's an invalid command
+    console = Console()
+    console.print(f"[bold red][!] Unrecognized command: '{cmd}'[/bold red]")
+    console.print("[yellow]Type [cyan]ragchat --help[/cyan] to get the list of commands.[/yellow]\n")
+    sys.exit(1)
