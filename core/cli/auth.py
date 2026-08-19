@@ -185,31 +185,22 @@ def handle_link_cli(args):
             if service == 'google':
                 g_manager = GoogleAuthManager()
                 check_profile_limit(g_manager, service, profile_name)
+                g_manager.authenticate_profile(profile_name)
+                print(f"[+] Google profile '{profile_name}' successfully linked locally!")
             else:
                 ms_manager = MicrosoftAuthManager()
                 check_profile_limit(ms_manager, service, profile_name)
-
-            auth_data = listen_for_vercel_oauth(service, profile_name)
-            if auth_data.get('access_token') or auth_data.get('refresh_token'):
-                if service == 'google':
-                    auth = GoogleAuthManager()
-                    accounts = auth._load_accounts()
+                auth_data = listen_for_vercel_oauth(service, profile_name)
+                if auth_data.get('access_token') or auth_data.get('refresh_token'):
+                    accounts = ms_manager._load_accounts()
                     accounts[profile_name] = {
                         "token": auth_data.get('access_token'),
                         "refresh_token": auth_data.get('refresh_token')
                     }
-                    auth._save_accounts(accounts)
+                    ms_manager._save_accounts(accounts)
+                    print(f"[+] Microsoft profile '{profile_name}' successfully linked via Vercel Gateway!")
                 else:
-                    auth = MicrosoftAuthManager()
-                    accounts = auth._load_accounts()
-                    accounts[profile_name] = {
-                        "token": auth_data.get('access_token'),
-                        "refresh_token": auth_data.get('refresh_token')
-                    }
-                    auth._save_accounts(accounts)
-                print(f"[+] {service.capitalize()} profile '{profile_name}' successfully linked via Vercel Gateway!")
-            else:
-                print(f"[!] {service.capitalize()} authorization failed or timed out.")
+                    print(f"[!] Microsoft authorization failed or timed out.")
         except Exception as e:
             print(f"[!] Authorization error: {e}")
         sys.exit(0)

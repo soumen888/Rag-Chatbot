@@ -25,8 +25,10 @@ def run_app():
     print_banner()
     cfg = ConfigManager()
     
-    # Run setup wizard if no LLM configured
-    if not os.environ.get("LLM_PROVIDER") or not os.environ.get("LLM_API_KEY") and os.environ.get("LLM_PROVIDER") not in ["ollama", "lmstudio"]:
+    # Run setup wizard if no LLM configured and not explicitly skipped
+    llm_provider = os.environ.get("LLM_PROVIDER")
+    if not llm_provider:
+        # Prompt option to configure, but don't force blocking wizard if they want to skip
         interactive_setup_wizard(cfg)
         # Reload environment
         load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'), override=True)
