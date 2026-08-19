@@ -37,7 +37,24 @@ def handle_update():
             if os.path.exists(venv_pip):
                 console.print("[*] Updating dependencies & core binaries...")
                 subprocess.run([venv_pip, "install", "-r", os.path.join(install_dir, "requirements.txt"), "--quiet"], check=False)
-                subprocess.run([venv_pip, "install", "--upgrade", "ragchat_core", "--quiet"], check=False)
+                
+                # Parse the updated WHEEL_URL from macos.sh so pip can locate the binary
+                wheel_url = None
+                macos_sh_path = os.path.join(install_dir, "install", "macos.sh")
+                if os.path.exists(macos_sh_path):
+                    try:
+                        with open(macos_sh_path, "r") as f:
+                            for line in f:
+                                if line.strip().startswith("WHEEL_URL="):
+                                    wheel_url = line.split("WHEEL_URL=")[1].strip().strip('"').strip("'")
+                                    break
+                    except Exception:
+                        pass
+                
+                if wheel_url:
+                    subprocess.run([venv_pip, "install", "--upgrade", wheel_url, "--quiet"], check=False)
+                else:
+                    subprocess.run([venv_pip, "install", "--upgrade", "ragchat_core", "--quiet"], check=False)
 
             console.print("\n[bold green][+] RAGChat updated successfully to the latest version![/bold green]")
             sys.exit(0)
