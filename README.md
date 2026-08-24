@@ -10,6 +10,21 @@
 
 ---
 
+## Install
+
+**macOS / Linux**
+```bash
+curl -fsSL https://raw.githubusercontent.com/soumen888/Rag-Chatbot/main/install/macos.sh | bash
+ragchat
+```
+
+**Windows**
+
+```powershell
+irm https://raw.githubusercontent.com/soumen888/Rag-Chatbot/main/install/windows.ps1 | iex
+ragchat
+```
+
 ## What it does
 
 You connect your accounts. It syncs the data, chunks it, embeds it, and stores everything locally. When you ask a question, it retrieves the most relevant context using a hybrid of vector search and BM25, fuses the results with RRF, and sends it to an LLM of your choice.
@@ -98,26 +113,11 @@ The retrieval, reasoning, and action responsibilities are separated on purpose �
 
 `Python` · `ChromaDB` · `SQLite` · `SQLCipher` · `BM25` · `RRF` · `LiteLLM` · `Playwright` · `Cython` · `Gemini` · `OpenAI` · `Claude` · `Groq` · `Ollama`
 
----
 
-## Install
-
-**macOS / Linux**
-```bash
-curl -fsSL https://raw.githubusercontent.com/soumen888/Rag-Chatbot/main/install/macos.sh | bash
-ragchat
-```
-
-**Windows**
-
-```powershell
-irm https://raw.githubusercontent.com/soumen888/Rag-Chatbot/main/install/windows.ps1 | iex
-ragchat
-```
 
 **[CLI Commands →](commands.md)**
 
----
+
 
 ## Status
 
