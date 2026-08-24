@@ -1,6 +1,5 @@
 import os
 import sys
-from dotenv import load_dotenv
 
 from core import (
     VectorDB,
@@ -30,8 +29,7 @@ def run_app():
     if not llm_provider:
         # Prompt option to configure, but don't force blocking wizard if they want to skip
         interactive_setup_wizard(cfg)
-        # Reload environment
-        load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'), override=True)
+        # os.environ is already updated by write_env_var inside the wizard
 
     db = VectorDB()
     chatbot = init_llm_provider_wrapper()

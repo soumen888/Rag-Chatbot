@@ -6,10 +6,13 @@ project_root = os.path.dirname(os.path.abspath(__file__))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from dotenv import load_dotenv
+from ragchat_core.core.config_manager import ConfigManager
 
-# Load variables from .env file relative to this script
-load_dotenv(os.path.join(project_root, '.env'))
+# One-time migration of any existing .env file → keyring, then load all
+# config keys from keyring into os.environ so downstream code is unaffected.
+_cfg = ConfigManager()
+_cfg._migrate_legacy_dotenv()
+_cfg.load_all_to_env()
 
 from main.menu import run_app
 

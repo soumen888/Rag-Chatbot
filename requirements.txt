@@ -3,7 +3,6 @@ chromadb
 onnxruntime
 beautifulsoup4
 requests
-python-dotenv
 playwright
 rich
 telethon
@@ -17,4 +16,7 @@ litellm
 google-auth-oauthlib
 google-api-python-client
 msal
-keyring
+
+# Secure credential storage (OS Keychain / Linux Secret Service / headless fallback)
+keyring>=24.0.0
+keyrings.alt>=5.0.0

@@ -1,0 +1,50 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    name: Download wheel from Private & publish to Public release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Extract version tag
+        id: version
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Wait for Private repo release to be ready
+        # Give the Private repo CI a few minutes to finish building first.
+        # Increase if the Private build is slow.
+        run: sleep 180
+
+      - name: Download wheel from Private repo release
+        env:
+          PRIVATE_PAT: ${{ secrets.PRIVATE_REPO_PAT }}
+          TAG: ${{ steps.version.outputs.TAG }}
+        run: |
+          mkdir -p dist
+          # Fetch the release asset list from the Private repo
+          ASSET_URL=$(curl -s -H "Authorization: token $PRIVATE_PAT" \
+            "https://api.github.com/repos/soumen888/Ragchat/releases/tags/$TAG" \
+            | python3 -c "import sys,json; assets=json.load(sys.stdin)['assets']; print(next(a['browser_download_url'] for a in assets if a['name'].endswith('.whl')))")
+
+          echo "Downloading: $ASSET_URL"
+          curl -L -H "Authorization: token $PRIVATE_PAT" \
+            -H "Accept: application/octet-stream" \
+            "$ASSET_URL" -o dist/ragchat_core.whl
+
+          ls -lh dist/
+
+      - name: Create Public GitHub Release and upload wheel
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ragchat_core.whl
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
