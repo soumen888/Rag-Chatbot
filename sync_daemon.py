@@ -2,10 +2,14 @@ import os
 import sys
 import time
 from datetime import datetime
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
+from ragchat_core.core.config_manager import ConfigManager
+
+# One-time migration of any existing .env file → keyring, then populate os.environ
+# so all os.environ.get() calls in the daemon and imported modules resolve correctly.
+_cfg = ConfigManager()
+_cfg._migrate_legacy_dotenv()
+_cfg.load_all_to_env()
 
 from ragchat_core.services.telegram.ingestor import TelegramIngestor
 from ragchat_core.services.discord.ingestor import DiscordIngestor

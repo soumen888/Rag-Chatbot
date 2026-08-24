@@ -1,9 +1,11 @@
 # Use lightweight official Python image
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # Prevent Python from writing .pyc files & buffer output
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+# Use file-based keyring backend in headless Docker environments (no D-Bus / Keychain available)
+ENV PYTHON_KEYRING_BACKEND=keyrings.alt.file.PlaintextKeyring
 
 # Set working directory
 WORKDIR /app

@@ -1,7 +1,6 @@
 import os
 import sys
 import getpass
-from dotenv import load_dotenv
 from ragchat_core.core.chatbot import get_provider, PROVIDER_INFO
 from ragchat_core.core.config_manager import ConfigManager
 from ragchat_core.services.google.auth import GoogleAuthManager
@@ -289,4 +288,4 @@ def handle_settings_menu(cfg):
 
         elif sub == "7":
             interactive_setup_wizard(cfg)
-            load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../.env'), override=True)
+            # os.environ is already updated by write_env_var inside the wizard — no reload needed

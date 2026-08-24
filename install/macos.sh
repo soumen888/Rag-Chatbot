@@ -5,7 +5,7 @@ set -e
 REPO_URL="https://github.com/soumen888/Rag-Chatbot.git"
 INSTALL_DIR="$HOME/.ragchat"
 BIN_DIR="$HOME/.local/bin"
-WHEEL_URL="https://github.com/soumen888/Rag-Chatbot/releases/download/v1.1.6/ragchat_core-1.1.6-cp311-cp311-macosx_10_9_universal2.whl"
+WHEEL_URL="https://github.com/soumen888/Rag-Chatbot/releases/download/v1.1.7/ragchat_core-1.1.7-cp314-cp314-macosx_10_15_universal2.whl"
 
 echo "=================================================="
 echo "          Installing RAGChat                      "
@@ -26,12 +26,12 @@ spinner() {
     printf "  [✓] %s\n" "$msg"
 }
 
-# 1. Detect Python 3.11 binary
+# 1. Detect Python 3.14 binary
 PYTHON_CMD="python3"
-if command -v python3.11 &> /dev/null; then
-    PYTHON_CMD="python3.11"
-elif command -v /opt/homebrew/bin/python3.11 &> /dev/null; then
-    PYTHON_CMD="/opt/homebrew/bin/python3.11"
+if command -v python3.14 &> /dev/null; then
+    PYTHON_CMD="python3.14"
+elif command -v /Library/Frameworks/Python.framework/Versions/3.14/bin/python3.14 &> /dev/null; then
+    PYTHON_CMD="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3.14"
 fi
 
 if ! command -v "$PYTHON_CMD" &> /dev/null; then
@@ -72,7 +72,7 @@ source venv/bin/activate
 
 # 4. Install Compiled Core Binary Wheel
 (
-    pip install "$WHEEL_URL" --quiet 2>/dev/null || pip install "/Users/soumen/Documents/VS Code/Public/Ragchat/Private/dist/ragchat_core-1.1.6-cp311-cp311-macosx_10_9_universal2.whl" --quiet 2>/dev/null || true
+    pip install "$WHEEL_URL" --quiet 2>/dev/null || pip install "/Users/soumen/Documents/VS Code/Public/Ragchat/Private/dist/ragchat_core-1.1.7-cp314-cp314-macosx_10_15_universal2.whl" --quiet 2>/dev/null || true
 ) &
 spinner $! "Installing compiled core binary engine..."
 
