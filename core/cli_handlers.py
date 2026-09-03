@@ -1,4 +1,3 @@
-import sys
 import time
 
 def parse_time_window(window_str):

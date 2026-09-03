@@ -119,13 +119,23 @@ The retrieval, reasoning, and action responsibilities are separated on purpose â
 
 
 
+## Configuration & Troubleshooting
+
+### Avoiding macOS Keychain Password Prompts
+
+If macOS prompts for your password or Touch ID on every `ragchat` invocation (due to OS-level security prompt loops for unsigned CLI Python executables), export the plaintext file keyring backend in your shell profile (`~/.zshrc` or `~/.bash_profile`):
+
+```bash
+export PYTHON_KEYRING_BACKEND=keyrings.alt.file.PlaintextKeyring
+```
+
+Then reload your shell:
+```bash
+source ~/.zshrc
+```
+
+---
+
 ## Status
-
-
-
-
-
-
-
 
 Core pipeline is done. Currently working on: RAGAS evaluation suite, cross-encoder reranking, parent-child retrieval, and stronger prompt injection hardening. MCP is being evaluated selectively not adopted by default.

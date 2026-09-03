@@ -16,3 +16,5 @@ from .menus.discord import handle_discord_menu
 from .menus.chat import handle_chat_menu
 from .menus.collections import handle_collections_menu
 from .menus.settings import handle_settings_menu, interactive_setup_wizard, init_llm_provider_wrapper
+from .menus.pageindex import handle_pageindex_menu
+

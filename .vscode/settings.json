@@ -1,9 +1,8 @@
 {
-    "python-envs.pythonProjects": [
-        {
-            "path": ".",
-            "envManager": "ms-python.python:system",
-            "packageManager": "ms-python.python:pip"
-        }
+    "python.defaultInterpreterPath": "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/../Private",
+        "/Users/soumen/Documents/VS Code/Public/Ragchat/Private"
     ]
 }
