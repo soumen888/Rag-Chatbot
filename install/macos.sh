@@ -5,7 +5,7 @@ set -e
 REPO_URL="https://github.com/soumen888/Rag-Chatbot.git"
 INSTALL_DIR="$HOME/.ragchat"
 BIN_DIR="$HOME/.local/bin"
-WHEEL_URL="https://github.com/soumen888/Rag-Chatbot/releases/download/v1.1.8/ragchat_core-1.1.8-cp314-cp314-macosx_10_15_universal2.whl"
+WHEEL_URL="https://github.com/soumen888/Rag-Chatbot/releases/download/v1.1.8/ragchat_core-1.1.8-cp312-cp312-macosx_10_15_universal2.whl"
 
 echo "=================================================="
 echo "          Installing RAGChat                      "
@@ -26,16 +26,16 @@ spinner() {
     printf "  [✓] %s\n" "$msg"
 }
 
-# 1. Detect Python 3.14 binary
+# 1. Detect Python 3.12 binary
 PYTHON_CMD="python3"
-if command -v python3.14 &> /dev/null; then
-    PYTHON_CMD="python3.14"
-elif command -v /Library/Frameworks/Python.framework/Versions/3.14/bin/python3.14 &> /dev/null; then
-    PYTHON_CMD="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3.14"
+if command -v python3.12 &> /dev/null; then
+    PYTHON_CMD="python3.12"
+elif command -v /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 &> /dev/null; then
+    PYTHON_CMD="/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12"
 fi
 
 if ! command -v "$PYTHON_CMD" &> /dev/null; then
-    echo "[!] Python 3 is required. Download at: https://www.python.org/downloads/"
+    echo "[!] Python 3.12 is required. Download at: https://www.python.org/downloads/release/python-3120/"
     exit 1
 fi
 
