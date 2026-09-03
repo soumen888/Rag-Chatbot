@@ -11,7 +11,8 @@ from core import (
     handle_collections_menu,
     handle_settings_menu,
     interactive_setup_wizard,
-    init_llm_provider_wrapper
+    init_llm_provider_wrapper,
+    handle_pageindex_menu
 )
 from main.stats import print_banner
 from main.cli import handle_cli_commands
@@ -42,9 +43,10 @@ def run_app():
         print("4. Chat with Knowledge Base")
         print("5. Manage Collections (List & Delete)")
         print("6. Settings & Account Connections")
-        print("7. Exit")
+        print("7. Large Document Chat (PageIndex)")
+        print("8. Exit")
         
-        choice = input("\nSelect an option (1-7): ").strip()
+        choice = input("\nSelect an option (1-8): ").strip()
         
         if choice == "1":
             handle_website_menu(db)
@@ -59,7 +61,9 @@ def run_app():
         elif choice == "6":
             handle_settings_menu(cfg)
         elif choice == "7":
+            handle_pageindex_menu(cfg)
+        elif choice == "8":
             print("Exiting. Goodbye!")
             sys.exit(0)
         else:
-            print("[!] Invalid option. Please select between 1 and 7.")
+            print("[!] Invalid option. Please select between 1 and 8.")

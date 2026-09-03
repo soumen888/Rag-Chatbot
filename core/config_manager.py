@@ -41,6 +41,23 @@ class ConfigManager:
         # Keep os.environ in sync
         os.environ[key] = str(value)
 
+    def load_all_to_env(self):
+        """Loads environment variables if needed."""
+        if os.path.exists(self.env_path):
+            try:
+                with open(self.env_path, 'r') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith('#') and '=' in line:
+                            k, _, v = line.partition('=')
+                            os.environ.setdefault(k.strip(), v.strip())
+            except Exception:
+                pass
+
+    def _migrate_legacy_dotenv(self):
+        """No-op for public fallback config manager."""
+        pass
+
     def save_google_client_secrets(self, json_data):
         """Saves Google OAuth client secrets data to ~/.config/ragchat/client_secrets.json."""
         config_dir = os.path.expanduser("~/.config/ragchat")

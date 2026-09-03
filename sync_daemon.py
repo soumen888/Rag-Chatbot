@@ -3,7 +3,20 @@ import sys
 import time
 from datetime import datetime
 
-from ragchat_core.core.config_manager import ConfigManager
+# Ensure local workspace modules are prioritized
+project_root = os.path.dirname(os.path.abspath(__file__))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+
+# Secure OS Keychain is used by default; custom backends can still be set via PYTHON_KEYRING_BACKEND
+
+from typing import Any
+
+try:
+    from ragchat_core.core.config_manager import ConfigManager  # type: ignore
+except ImportError:
+    from core.config_manager import ConfigManager
 
 # One-time migration of any existing .env file → keyring, then populate os.environ
 # so all os.environ.get() calls in the daemon and imported modules resolve correctly.
@@ -11,14 +24,33 @@ _cfg = ConfigManager()
 _cfg._migrate_legacy_dotenv()
 _cfg.load_all_to_env()
 
-from ragchat_core.services.telegram.ingestor import TelegramIngestor
-from ragchat_core.services.discord.ingestor import DiscordIngestor
-from ragchat_core.services.google.auth import GoogleAuthManager
-from ragchat_core.services.microsoft.auth import MicrosoftAuthManager
-from ragchat_core.core.sync import GoogleSyncEngine, MicrosoftSyncEngine
-from ragchat_core.core.chunker import DocChunker
-from ragchat_core.core.vector_db import VectorDB
-from ragchat_core.core.config_manager import ConfigManager
+try:
+    from ragchat_core.services.telegram.ingestor import TelegramIngestor  # type: ignore
+    from ragchat_core.services.discord.ingestor import DiscordIngestor  # type: ignore
+    from ragchat_core.services.google.auth import GoogleAuthManager  # type: ignore
+    from ragchat_core.services.microsoft.auth import MicrosoftAuthManager  # type: ignore
+    from ragchat_core.core.sync import GoogleSyncEngine, MicrosoftSyncEngine  # type: ignore
+    from ragchat_core.core.chunker import DocChunker  # type: ignore
+    from ragchat_core.core.vector_db import VectorDB  # type: ignore
+except ImportError:
+    try:
+        from services.telegram.ingestor import TelegramIngestor  # type: ignore
+        from services.discord.ingestor import DiscordIngestor  # type: ignore
+        from services.google.auth import GoogleAuthManager  # type: ignore
+        from services.microsoft.auth import MicrosoftAuthManager  # type: ignore
+        from core.sync import GoogleSyncEngine, MicrosoftSyncEngine  # type: ignore
+        from core.chunker import DocChunker  # type: ignore
+        from core.vector_db import VectorDB  # type: ignore
+    except ImportError:
+        TelegramIngestor: Any = None
+        DiscordIngestor: Any = None
+        GoogleAuthManager: Any = None
+        MicrosoftAuthManager: Any = None
+        GoogleSyncEngine: Any = None
+        MicrosoftSyncEngine: Any = None
+        DocChunker: Any = None
+        VectorDB: Any = None
+
 
 def run_daemon():
     print("==================================================")

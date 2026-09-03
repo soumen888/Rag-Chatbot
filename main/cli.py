@@ -145,6 +145,7 @@ def show_help_menu():
     console.print("  [bold green]bind [google] [file][/bold green]      Bind custom Google OAuth Client JSON credentials")
     console.print("  [bold green]link <service> <profile>[/bold green]   Link a new account profile (google, microsoft, telegram, discord)")
     console.print("  [bold green]chat <collection>[/bold green]          Start interactive chat with an ingested collection")
+    console.print("  [bold green]pageindex <action>[/bold green]          PageIndex RAG on long PDFs (actions: index, chat, list)")
     console.print("  [bold green]sync[/bold green]                        Run full sync daemon on connected channels")
     console.print("  [bold green]update[/bold green]                      Update RAGChat to the latest version")
     console.print("  [bold green]help[/bold green]                        Show this help usage menu\n")
@@ -188,7 +189,8 @@ def handle_cli_commands():
             handle_gmail_cli,
             handle_outlook_cli,
             handle_telegram_cli,
-            handle_discord_cli
+            handle_discord_cli,
+            handle_pageindex_cli
         )
     except ImportError:
         from ragchat_core.core.cli_handlers import (
@@ -203,7 +205,8 @@ def handle_cli_commands():
             handle_gmail_cli,
             handle_outlook_cli,
             handle_telegram_cli,
-            handle_discord_cli
+            handle_discord_cli,
+            handle_pageindex_cli
         )
 
     commands = {
@@ -218,7 +221,8 @@ def handle_cli_commands():
         '-g': handle_gmail_cli,
         '-m': handle_outlook_cli,
         'telegram': handle_telegram_cli,
-        'discord': handle_discord_cli
+        'discord': handle_discord_cli,
+        'pageindex': handle_pageindex_cli
     }
 
     if cmd in commands:
